@@ -1,0 +1,760 @@
+[LC:0][15:31:05] Node initialized: 127.0.0.1:5002
+[LC:0][15:31:05] REST API started on port 8002
+[LC:0][15:31:05] Node started and listening on port 5002
+[LC:0][15:36:57] Node initialized: 127.0.0.1:5002
+[LC:0][15:36:58] REST API started on port 8002
+[LC:0][15:36:58] Node started and listening on port 5002
+[LC:0][15:37:23] Node initialized: 127.0.0.1:5002
+[LC:0][15:37:23] REST API started on port 8002
+[LC:0][15:37:23] Node started and listening on port 5002
+[LC:1][15:37:35] JOINED ring: pred=localhost:5001, succ=127.0.0.1:5001
+[LC:5][15:37:35] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:5]
+[LC:5][15:37:35] TOKEN RECEIVED from 127.0.0.1:5001 [LC:5]
+[LC:6][15:37:35] RECEIVED: PING from 127.0.0.1:5001 [LC:6]
+[LC:7][15:37:35] Error handling connection: Broken pipe
+[LC:8][15:37:35] TIMEOUT: No PONG from successor, assuming failure
+[LC:8][15:37:35] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:8][15:37:35] Attempting to repair topology...
+[LC:9][15:37:36] TOKEN PASSED to 127.0.0.1:5001 [LC:9]
+[LC:9][15:37:36] TIMEOUT: No PONG from successor, assuming failure
+[LC:9][15:37:36] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:9][15:37:36] Attempting to repair topology...
+[LC:13][15:37:36] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:13]
+[LC:13][15:37:36] TOKEN RECEIVED from 127.0.0.1:5001 [LC:13]
+[LC:13][15:37:36] TIMEOUT: No PONG from successor, assuming failure
+[LC:13][15:37:36] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:13][15:37:36] Attempting to repair topology...
+[LC:14][15:37:37] TOKEN PASSED to 127.0.0.1:5001 [LC:14]
+[LC:14][15:37:37] TIMEOUT: No PONG from successor, assuming failure
+[LC:14][15:37:37] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:14][15:37:37] Attempting to repair topology...
+[LC:17][15:37:37] RECEIVED: PING from 127.0.0.1:5001 [LC:17]
+[LC:18][15:37:37] Error handling connection: Broken pipe
+[LC:19][15:37:37] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:19]
+[LC:19][15:37:37] TOKEN RECEIVED from 127.0.0.1:5001 [LC:19]
+[LC:20][15:37:37] TIMEOUT: No PONG from successor, assuming failure
+[LC:20][15:37:37] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:20][15:37:37] Attempting to repair topology...
+[LC:21][15:37:38] TOKEN PASSED to 127.0.0.1:5001 [LC:21]
+[LC:21][15:37:38] TIMEOUT: No PONG from successor, assuming failure
+[LC:21][15:37:38] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:21][15:37:38] Attempting to repair topology...
+[LC:25][15:37:38] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:25]
+[LC:25][15:37:38] TOKEN RECEIVED from 127.0.0.1:5001 [LC:25]
+[LC:25][15:37:38] TIMEOUT: No PONG from successor, assuming failure
+[LC:25][15:37:38] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:25][15:37:38] Attempting to repair topology...
+[LC:26][15:37:39] TOKEN PASSED to 127.0.0.1:5001 [LC:26]
+[LC:26][15:37:39] TIMEOUT: No PONG from successor, assuming failure
+[LC:26][15:37:39] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:26][15:37:39] Attempting to repair topology...
+[LC:29][15:37:39] RECEIVED: PING from 127.0.0.1:5001 [LC:29]
+[LC:30][15:37:39] Error handling connection: Broken pipe
+[LC:31][15:37:39] TIMEOUT: No PONG from successor, assuming failure
+[LC:31][15:37:39] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:31][15:37:39] Attempting to repair topology...
+[LC:35][15:37:40] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:35]
+[LC:35][15:37:40] TOKEN RECEIVED from 127.0.0.1:5001 [LC:35]
+[LC:35][15:37:40] TIMEOUT: No PONG from successor, assuming failure
+[LC:35][15:37:40] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:35][15:37:40] Attempting to repair topology...
+[LC:36][15:37:40] TOKEN PASSED to 127.0.0.1:5001 [LC:36]
+[LC:36][15:37:40] TIMEOUT: No PONG from successor, assuming failure
+[LC:36][15:37:40] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:36][15:37:40] Attempting to repair topology...
+[LC:39][15:37:41] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:39]
+[LC:39][15:37:41] TOKEN RECEIVED from 127.0.0.1:5001 [LC:39]
+[LC:39][15:37:41] TIMEOUT: No PONG from successor, assuming failure
+[LC:39][15:37:41] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:39][15:37:41] Attempting to repair topology...
+[LC:40][15:37:41] RECEIVED: PING from 127.0.0.1:5001 [LC:40]
+[LC:41][15:37:41] Error handling connection: Broken pipe
+[LC:42][15:37:41] TOKEN PASSED to 127.0.0.1:5001 [LC:42]
+[LC:43][15:37:42] TIMEOUT: No PONG from successor, assuming failure
+[LC:43][15:37:42] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:43][15:37:42] Attempting to repair topology...
+[LC:47][15:37:42] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:47]
+[LC:47][15:37:42] TOKEN RECEIVED from 127.0.0.1:5001 [LC:47]
+[LC:47][15:37:42] TIMEOUT: No PONG from successor, assuming failure
+[LC:47][15:37:42] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:47][15:37:42] Attempting to repair topology...
+[LC:48][15:37:42] TOKEN PASSED to 127.0.0.1:5001 [LC:48]
+[LC:48][15:37:43] TIMEOUT: No PONG from successor, assuming failure
+[LC:48][15:37:43] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:48][15:37:43] Attempting to repair topology...
+[LC:51][15:37:43] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:51]
+[LC:51][15:37:43] TOKEN RECEIVED from 127.0.0.1:5001 [LC:51]
+[LC:51][15:37:43] TIMEOUT: No PONG from successor, assuming failure
+[LC:51][15:37:43] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:51][15:37:43] Attempting to repair topology...
+[LC:52][15:37:43] RECEIVED: PING from 127.0.0.1:5001 [LC:52]
+[LC:53][15:37:43] Error handling connection: Broken pipe
+[LC:54][15:37:43] TOKEN PASSED to 127.0.0.1:5001 [LC:54]
+[LC:55][15:37:44] TIMEOUT: No PONG from successor, assuming failure
+[LC:55][15:37:44] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:55][15:37:44] Attempting to repair topology...
+[LC:59][15:37:44] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:59]
+[LC:59][15:37:44] TOKEN RECEIVED from 127.0.0.1:5001 [LC:59]
+[LC:59][15:37:44] TIMEOUT: No PONG from successor, assuming failure
+[LC:59][15:37:44] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:59][15:37:44] Attempting to repair topology...
+[LC:59][15:37:45] TIMEOUT: No PONG from successor, assuming failure
+[LC:59][15:37:45] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:59][15:37:45] Attempting to repair topology...
+[LC:60][15:37:45] TOKEN PASSED to 127.0.0.1:5001 [LC:60]
+[LC:60][15:37:45] TIMEOUT: No PONG from successor, assuming failure
+[LC:60][15:37:45] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:60][15:37:45] Attempting to repair topology...
+[LC:63][15:37:45] RECEIVED: PING from 127.0.0.1:5001 [LC:63]
+[LC:64][15:37:45] Error handling connection: Broken pipe
+[LC:65][15:37:45] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:65]
+[LC:65][15:37:45] TOKEN RECEIVED from 127.0.0.1:5001 [LC:65]
+[LC:66][15:37:46] TIMEOUT: No PONG from successor, assuming failure
+[LC:66][15:37:46] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:66][15:37:46] Attempting to repair topology...
+[LC:67][15:37:46] TOKEN PASSED to 127.0.0.1:5001 [LC:67]
+[LC:67][15:37:46] TIMEOUT: No PONG from successor, assuming failure
+[LC:67][15:37:46] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:67][15:37:46] Attempting to repair topology...
+[LC:71][15:37:46] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:71]
+[LC:71][15:37:46] TOKEN RECEIVED from 127.0.0.1:5001 [LC:71]
+[LC:71][15:37:47] TIMEOUT: No PONG from successor, assuming failure
+[LC:71][15:37:47] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:71][15:37:47] Attempting to repair topology...
+[LC:72][15:37:47] TOKEN PASSED to 127.0.0.1:5001 [LC:72]
+[LC:72][15:37:47] TIMEOUT: No PONG from successor, assuming failure
+[LC:72][15:37:47] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:72][15:37:47] Attempting to repair topology...
+[LC:75][15:37:47] RECEIVED: PING from 127.0.0.1:5001 [LC:75]
+[LC:76][15:37:47] Error handling connection: Broken pipe
+[LC:77][15:37:47] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:77]
+[LC:77][15:37:47] TOKEN RECEIVED from 127.0.0.1:5001 [LC:77]
+[LC:78][15:37:48] TIMEOUT: No PONG from successor, assuming failure
+[LC:78][15:37:48] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:78][15:37:48] Attempting to repair topology...
+[LC:79][15:37:48] TOKEN PASSED to 127.0.0.1:5001 [LC:79]
+[LC:79][15:37:48] TIMEOUT: No PONG from successor, assuming failure
+[LC:79][15:37:48] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:79][15:37:48] Attempting to repair topology...
+[LC:83][15:37:49] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:83]
+[LC:83][15:37:49] TOKEN RECEIVED from 127.0.0.1:5001 [LC:83]
+[LC:83][15:37:49] TIMEOUT: No PONG from successor, assuming failure
+[LC:83][15:37:49] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:83][15:37:49] Attempting to repair topology...
+[LC:83][15:37:49] TIMEOUT: No PONG from successor, assuming failure
+[LC:83][15:37:49] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:83][15:37:49] Attempting to repair topology...
+[LC:84][15:37:49] TOKEN PASSED to 127.0.0.1:5001 [LC:84]
+[LC:87][15:37:49] RECEIVED: PING from 127.0.0.1:5001 [LC:87]
+[LC:88][15:37:49] Error handling connection: Broken pipe
+[LC:89][15:37:50] TIMEOUT: No PONG from successor, assuming failure
+[LC:89][15:37:50] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:89][15:37:50] Attempting to repair topology...
+[LC:93][15:37:50] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:93]
+[LC:93][15:37:50] TOKEN RECEIVED from 127.0.0.1:5001 [LC:93]
+[LC:93][15:37:50] TIMEOUT: No PONG from successor, assuming failure
+[LC:93][15:37:50] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:93][15:37:50] Attempting to repair topology...
+[LC:94][15:37:50] TOKEN PASSED to 127.0.0.1:5001 [LC:94]
+[LC:94][15:37:51] TIMEOUT: No PONG from successor, assuming failure
+[LC:94][15:37:51] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:94][15:37:51] Attempting to repair topology...
+[LC:97][15:37:51] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:97]
+[LC:97][15:37:51] TOKEN RECEIVED from 127.0.0.1:5001 [LC:97]
+[LC:97][15:37:51] TIMEOUT: No PONG from successor, assuming failure
+[LC:97][15:37:51] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:97][15:37:51] Attempting to repair topology...
+[LC:98][15:37:51] RECEIVED: PING from 127.0.0.1:5001 [LC:98]
+[LC:99][15:37:51] Error handling connection: Broken pipe
+[LC:100][15:37:51] TOKEN PASSED to 127.0.0.1:5001 [LC:100]
+[LC:101][15:37:52] TIMEOUT: No PONG from successor, assuming failure
+[LC:101][15:37:52] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:101][15:37:52] Attempting to repair topology...
+[LC:105][15:37:52] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:105]
+[LC:105][15:37:52] TOKEN RECEIVED from 127.0.0.1:5001 [LC:105]
+[LC:105][15:37:52] TIMEOUT: No PONG from successor, assuming failure
+[LC:105][15:37:52] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:105][15:37:52] Attempting to repair topology...
+[LC:106][15:37:53] TOKEN PASSED to 127.0.0.1:5001 [LC:106]
+[LC:106][15:37:53] TIMEOUT: No PONG from successor, assuming failure
+[LC:106][15:37:53] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:106][15:37:53] Attempting to repair topology...
+[LC:109][15:37:53] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:109]
+[LC:109][15:37:53] TOKEN RECEIVED from 127.0.0.1:5001 [LC:109]
+[LC:109][15:37:53] TIMEOUT: No PONG from successor, assuming failure
+[LC:109][15:37:53] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:109][15:37:53] Attempting to repair topology...
+[LC:110][15:37:53] RECEIVED: PING from 127.0.0.1:5001 [LC:110]
+[LC:111][15:37:53] Error handling connection: Broken pipe
+[LC:112][15:37:54] TOKEN PASSED to 127.0.0.1:5001 [LC:112]
+[LC:113][15:37:54] TIMEOUT: No PONG from successor, assuming failure
+[LC:113][15:37:54] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:113][15:37:54] Attempting to repair topology...
+[LC:113][15:37:54] TIMEOUT: No PONG from successor, assuming failure
+[LC:113][15:37:54] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:113][15:37:54] Attempting to repair topology...
+[LC:117][15:37:54] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:117]
+[LC:117][15:37:54] TOKEN RECEIVED from 127.0.0.1:5001 [LC:117]
+[LC:117][15:37:55] TIMEOUT: No PONG from successor, assuming failure
+[LC:117][15:37:55] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:117][15:37:55] Attempting to repair topology...
+[LC:118][15:37:55] TOKEN PASSED to 127.0.0.1:5001 [LC:118]
+[LC:118][15:37:55] TIMEOUT: No PONG from successor, assuming failure
+[LC:118][15:37:55] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:118][15:37:55] Attempting to repair topology...
+[LC:121][15:37:55] RECEIVED: PING from 127.0.0.1:5001 [LC:121]
+[LC:122][15:37:55] Error handling connection: Broken pipe
+[LC:123][15:37:55] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:123]
+[LC:123][15:37:55] TOKEN RECEIVED from 127.0.0.1:5001 [LC:123]
+[LC:124][15:37:56] TIMEOUT: No PONG from successor, assuming failure
+[LC:124][15:37:56] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:124][15:37:56] Attempting to repair topology...
+[LC:125][15:37:56] TOKEN PASSED to 127.0.0.1:5001 [LC:125]
+[LC:125][15:37:56] TIMEOUT: No PONG from successor, assuming failure
+[LC:125][15:37:56] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:125][15:37:56] Attempting to repair topology...
+[LC:129][15:37:56] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:129]
+[LC:129][15:37:56] TOKEN RECEIVED from 127.0.0.1:5001 [LC:129]
+[LC:129][15:37:57] TIMEOUT: No PONG from successor, assuming failure
+[LC:129][15:37:57] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:129][15:37:57] Attempting to repair topology...
+[LC:130][15:37:57] TOKEN PASSED to 127.0.0.1:5001 [LC:130]
+[LC:130][15:37:57] TIMEOUT: No PONG from successor, assuming failure
+[LC:130][15:37:57] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:130][15:37:57] Attempting to repair topology...
+[LC:133][15:37:57] RECEIVED: PING from 127.0.0.1:5001 [LC:133]
+[LC:134][15:37:57] Error handling connection: Broken pipe
+[LC:135][15:37:58] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:135]
+[LC:135][15:37:58] TOKEN RECEIVED from 127.0.0.1:5001 [LC:135]
+[LC:136][15:37:58] TIMEOUT: No PONG from successor, assuming failure
+[LC:136][15:37:58] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:136][15:37:58] Attempting to repair topology...
+[LC:137][15:37:58] TOKEN PASSED to 127.0.0.1:5001 [LC:137]
+[LC:137][15:37:58] TIMEOUT: No PONG from successor, assuming failure
+[LC:137][15:37:58] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:137][15:37:58] Attempting to repair topology...
+[LC:141][15:37:59] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:141]
+[LC:141][15:37:59] TIMEOUT: No PONG from successor, assuming failure
+[LC:141][15:37:59] TOKEN RECEIVED from 127.0.0.1:5001 [LC:141]
+[LC:141][15:37:59] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:141][15:37:59] Attempting to repair topology...
+[LC:141][15:37:59] TIMEOUT: No PONG from successor, assuming failure
+[LC:141][15:37:59] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:141][15:37:59] Attempting to repair topology...
+[LC:142][15:37:59] RECEIVED: PING from 127.0.0.1:5001 [LC:142]
+[LC:143][15:37:59] Error handling connection: Broken pipe
+[LC:144][15:37:59] TOKEN PASSED to 127.0.0.1:5001 [LC:144]
+[LC:145][15:38:00] TIMEOUT: No PONG from successor, assuming failure
+[LC:145][15:38:00] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:145][15:38:00] Attempting to repair topology...
+[LC:149][15:38:00] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:149]
+[LC:149][15:38:00] TOKEN RECEIVED from 127.0.0.1:5001 [LC:149]
+[LC:149][15:38:00] TIMEOUT: No PONG from successor, assuming failure
+[LC:149][15:38:00] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:149][15:38:00] Attempting to repair topology...
+[LC:150][15:38:00] TOKEN PASSED to 127.0.0.1:5001 [LC:150]
+[LC:150][15:38:01] TIMEOUT: No PONG from successor, assuming failure
+[LC:150][15:38:01] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:150][15:38:01] Attempting to repair topology...
+[LC:153][15:38:01] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:153]
+[LC:153][15:38:01] TOKEN RECEIVED from 127.0.0.1:5001 [LC:153]
+[LC:153][15:38:01] TIMEOUT: No PONG from successor, assuming failure
+[LC:153][15:38:01] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:153][15:38:01] Attempting to repair topology...
+[LC:154][15:38:01] RECEIVED: PING from 127.0.0.1:5001 [LC:154]
+[LC:155][15:38:01] Error handling connection: Broken pipe
+[LC:156][15:38:01] TOKEN PASSED to 127.0.0.1:5001 [LC:156]
+[LC:157][15:38:02] TIMEOUT: No PONG from successor, assuming failure
+[LC:157][15:38:02] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:157][15:38:02] Attempting to repair topology...
+[LC:161][15:38:02] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:161]
+[LC:161][15:38:02] TOKEN RECEIVED from 127.0.0.1:5001 [LC:161]
+[LC:161][15:38:02] TIMEOUT: No PONG from successor, assuming failure
+[LC:161][15:38:02] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:161][15:38:02] Attempting to repair topology...
+[LC:162][15:38:02] TOKEN PASSED to 127.0.0.1:5001 [LC:162]
+[LC:162][15:38:03] TIMEOUT: No PONG from successor, assuming failure
+[LC:162][15:38:03] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:162][15:38:03] Attempting to repair topology...
+[LC:165][15:38:03] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:165]
+[LC:165][15:38:03] TOKEN RECEIVED from 127.0.0.1:5001 [LC:165]
+[LC:165][15:38:03] TIMEOUT: No PONG from successor, assuming failure
+[LC:165][15:38:03] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:165][15:38:03] Attempting to repair topology...
+[LC:166][15:38:03] RECEIVED: PING from 127.0.0.1:5001 [LC:166]
+[LC:167][15:38:03] Error handling connection: Broken pipe
+[LC:168][15:38:03] TOKEN PASSED to 127.0.0.1:5001 [LC:168]
+[LC:169][15:38:04] TIMEOUT: No PONG from successor, assuming failure
+[LC:169][15:38:04] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:169][15:38:04] Attempting to repair topology...
+[LC:173][15:38:04] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:173]
+[LC:173][15:38:04] TOKEN RECEIVED from 127.0.0.1:5001 [LC:173]
+[LC:173][15:38:04] TIMEOUT: No PONG from successor, assuming failure
+[LC:173][15:38:04] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:173][15:38:04] Attempting to repair topology...
+[LC:174][15:38:04] TOKEN PASSED to 127.0.0.1:5001 [LC:174]
+[LC:174][15:38:05] TIMEOUT: No PONG from successor, assuming failure
+[LC:174][15:38:05] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:174][15:38:05] Attempting to repair topology...
+[LC:177][15:38:05] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:177]
+[LC:177][15:38:05] TOKEN RECEIVED from 127.0.0.1:5001 [LC:177]
+[LC:177][15:38:05] TIMEOUT: No PONG from successor, assuming failure
+[LC:177][15:38:05] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:177][15:38:05] Attempting to repair topology...
+[LC:178][15:38:05] RECEIVED: PING from 127.0.0.1:5001 [LC:178]
+[LC:179][15:38:05] Error handling connection: Broken pipe
+[LC:180][15:38:06] TOKEN PASSED to 127.0.0.1:5001 [LC:180]
+[LC:181][15:38:06] TIMEOUT: No PONG from successor, assuming failure
+[LC:181][15:38:06] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:181][15:38:06] Attempting to repair topology...
+[LC:185][15:38:06] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:185]
+[LC:185][15:38:06] TOKEN RECEIVED from 127.0.0.1:5001 [LC:185]
+[LC:185][15:38:06] TIMEOUT: No PONG from successor, assuming failure
+[LC:185][15:38:06] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:185][15:38:06] Attempting to repair topology...
+[LC:186][15:38:07] TOKEN PASSED to 127.0.0.1:5001 [LC:186]
+[LC:186][15:38:07] TIMEOUT: No PONG from successor, assuming failure
+[LC:186][15:38:07] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:186][15:38:07] Attempting to repair topology...
+[LC:189][15:38:07] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:189]
+[LC:189][15:38:07] TOKEN RECEIVED from 127.0.0.1:5001 [LC:189]
+[LC:189][15:38:07] TIMEOUT: No PONG from successor, assuming failure
+[LC:189][15:38:07] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:189][15:38:07] Attempting to repair topology...
+[LC:190][15:38:07] RECEIVED: PING from 127.0.0.1:5001 [LC:190]
+[LC:191][15:38:07] Error handling connection: Broken pipe
+[LC:192][15:38:08] TOKEN PASSED to 127.0.0.1:5001 [LC:192]
+[LC:193][15:38:08] TIMEOUT: No PONG from successor, assuming failure
+[LC:193][15:38:08] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:193][15:38:08] Attempting to repair topology...
+[LC:197][15:38:08] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:197]
+[LC:197][15:38:08] TOKEN RECEIVED from 127.0.0.1:5001 [LC:197]
+[LC:197][15:38:08] TIMEOUT: No PONG from successor, assuming failure
+[LC:197][15:38:08] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:197][15:38:08] Attempting to repair topology...
+[LC:198][15:38:09] TOKEN PASSED to 127.0.0.1:5001 [LC:198]
+[LC:198][15:38:09] TIMEOUT: No PONG from successor, assuming failure
+[LC:198][15:38:09] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:198][15:38:09] Attempting to repair topology...
+[LC:201][15:38:09] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:201]
+[LC:201][15:38:09] TOKEN RECEIVED from 127.0.0.1:5001 [LC:201]
+[LC:201][15:38:09] TIMEOUT: No PONG from successor, assuming failure
+[LC:201][15:38:09] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:201][15:38:09] Attempting to repair topology...
+[LC:202][15:38:09] RECEIVED: PING from 127.0.0.1:5001 [LC:202]
+[LC:203][15:38:09] Error handling connection: Broken pipe
+[LC:204][15:38:10] TOKEN PASSED to 127.0.0.1:5001 [LC:204]
+[LC:205][15:38:10] TIMEOUT: No PONG from successor, assuming failure
+[LC:205][15:38:10] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:205][15:38:10] Attempting to repair topology...
+[LC:209][15:38:10] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:209]
+[LC:209][15:38:10] TOKEN RECEIVED from 127.0.0.1:5001 [LC:209]
+[LC:209][15:38:10] TIMEOUT: No PONG from successor, assuming failure
+[LC:209][15:38:10] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:209][15:38:10] Attempting to repair topology...
+[LC:209][15:38:11] TIMEOUT: No PONG from successor, assuming failure
+[LC:209][15:38:11] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:209][15:38:11] Attempting to repair topology...
+[LC:210][15:38:11] TOKEN PASSED to 127.0.0.1:5001 [LC:210]
+[LC:210][15:38:11] TIMEOUT: No PONG from successor, assuming failure
+[LC:210][15:38:11] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:210][15:38:11] Attempting to repair topology...
+[LC:213][15:38:11] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:213]
+[LC:213][15:38:11] TOKEN RECEIVED from 127.0.0.1:5001 [LC:213]
+[LC:214][15:38:11] RECEIVED: PING from 127.0.0.1:5001 [LC:214]
+[LC:215][15:38:11] Error handling connection: Broken pipe
+[LC:216][15:38:12] TIMEOUT: No PONG from successor, assuming failure
+[LC:216][15:38:12] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:216][15:38:12] Attempting to repair topology...
+[LC:217][15:38:12] TOKEN PASSED to 127.0.0.1:5001 [LC:217]
+[LC:217][15:38:12] TIMEOUT: No PONG from successor, assuming failure
+[LC:217][15:38:12] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:217][15:38:12] Attempting to repair topology...
+[LC:221][15:38:12] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:221]
+[LC:221][15:38:12] TOKEN RECEIVED from 127.0.0.1:5001 [LC:221]
+[LC:221][15:38:13] TIMEOUT: No PONG from successor, assuming failure
+[LC:221][15:38:13] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:221][15:38:13] Attempting to repair topology...
+[LC:222][15:38:13] TOKEN PASSED to 127.0.0.1:5001 [LC:222]
+[LC:222][15:38:13] TIMEOUT: No PONG from successor, assuming failure
+[LC:222][15:38:13] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:222][15:38:13] Attempting to repair topology...
+[LC:225][15:38:13] RECEIVED: PING from 127.0.0.1:5001 [LC:225]
+[LC:226][15:38:13] Error handling connection: Broken pipe
+[LC:227][15:38:14] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:227]
+[LC:227][15:38:14] TOKEN RECEIVED from 127.0.0.1:5001 [LC:227]
+[LC:228][15:38:14] TIMEOUT: No PONG from successor, assuming failure
+[LC:228][15:38:14] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:228][15:38:14] Attempting to repair topology...
+[LC:229][15:38:14] TOKEN PASSED to 127.0.0.1:5001 [LC:229]
+[LC:229][15:38:14] TIMEOUT: No PONG from successor, assuming failure
+[LC:229][15:38:14] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:229][15:38:14] Attempting to repair topology...
+[LC:233][15:38:15] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:233]
+[LC:233][15:38:15] TOKEN RECEIVED from 127.0.0.1:5001 [LC:233]
+[LC:233][15:38:15] TIMEOUT: No PONG from successor, assuming failure
+[LC:233][15:38:15] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:233][15:38:15] Attempting to repair topology...
+[LC:234][15:38:15] TOKEN PASSED to 127.0.0.1:5001 [LC:234]
+[LC:234][15:38:15] TIMEOUT: No PONG from successor, assuming failure
+[LC:234][15:38:15] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:234][15:38:15] Attempting to repair topology...
+[LC:237][15:38:15] RECEIVED: PING from 127.0.0.1:5001 [LC:237]
+[LC:238][15:38:15] Error handling connection: Broken pipe
+[LC:239][15:38:16] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:239]
+[LC:239][15:38:16] TOKEN RECEIVED from 127.0.0.1:5001 [LC:239]
+[LC:240][15:38:16] TIMEOUT: No PONG from successor, assuming failure
+[LC:240][15:38:16] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:240][15:38:16] Attempting to repair topology...
+[LC:241][15:38:16] TOKEN PASSED to 127.0.0.1:5001 [LC:241]
+[LC:241][15:38:16] TIMEOUT: No PONG from successor, assuming failure
+[LC:241][15:38:16] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:241][15:38:16] Attempting to repair topology...
+[LC:245][15:38:17] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:245]
+[LC:245][15:38:17] TOKEN RECEIVED from 127.0.0.1:5001 [LC:245]
+[LC:245][15:38:17] TIMEOUT: No PONG from successor, assuming failure
+[LC:245][15:38:17] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:245][15:38:17] Attempting to repair topology...
+[LC:246][15:38:17] TOKEN PASSED to 127.0.0.1:5001 [LC:246]
+[LC:246][15:38:17] TIMEOUT: No PONG from successor, assuming failure
+[LC:246][15:38:17] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:246][15:38:17] Attempting to repair topology...
+[LC:249][15:38:18] RECEIVED: PING from 127.0.0.1:5001 [LC:249]
+[LC:250][15:38:18] Error handling connection: Broken pipe
+[LC:251][15:38:18] TIMEOUT: No PONG from successor, assuming failure
+[LC:251][15:38:18] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:251][15:38:18] Attempting to repair topology...
+[LC:255][15:38:18] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:255]
+[LC:255][15:38:18] TOKEN RECEIVED from 127.0.0.1:5001 [LC:255]
+[LC:255][15:38:18] TIMEOUT: No PONG from successor, assuming failure
+[LC:255][15:38:18] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:255][15:38:18] Attempting to repair topology...
+[LC:256][15:38:19] TOKEN PASSED to 127.0.0.1:5001 [LC:256]
+[LC:256][15:38:19] TIMEOUT: No PONG from successor, assuming failure
+[LC:256][15:38:19] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:256][15:38:19] Attempting to repair topology...
+[LC:259][15:38:19] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:259]
+[LC:259][15:38:19] TOKEN RECEIVED from 127.0.0.1:5001 [LC:259]
+[LC:259][15:38:19] TIMEOUT: No PONG from successor, assuming failure
+[LC:259][15:38:19] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:259][15:38:19] Attempting to repair topology...
+[LC:260][15:38:20] RECEIVED: PING from 127.0.0.1:5001 [LC:260]
+[LC:261][15:38:20] Error handling connection: Broken pipe
+[LC:262][15:38:20] TOKEN PASSED to 127.0.0.1:5001 [LC:262]
+[LC:263][15:38:20] TIMEOUT: No PONG from successor, assuming failure
+[LC:263][15:38:20] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:263][15:38:20] Attempting to repair topology...
+[LC:267][15:38:20] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:267]
+[LC:267][15:38:20] TOKEN RECEIVED from 127.0.0.1:5001 [LC:267]
+[LC:267][15:38:20] TIMEOUT: No PONG from successor, assuming failure
+[LC:267][15:38:20] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:267][15:38:20] Attempting to repair topology...
+[LC:268][15:38:21] TOKEN PASSED to 127.0.0.1:5001 [LC:268]
+[LC:268][15:38:21] TIMEOUT: No PONG from successor, assuming failure
+[LC:268][15:38:21] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:268][15:38:21] Attempting to repair topology...
+[LC:271][15:38:21] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:271]
+[LC:271][15:38:21] TOKEN RECEIVED from 127.0.0.1:5001 [LC:271]
+[LC:271][15:38:21] TIMEOUT: No PONG from successor, assuming failure
+[LC:271][15:38:21] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:271][15:38:21] Attempting to repair topology...
+[LC:272][15:38:22] RECEIVED: PING from 127.0.0.1:5001 [LC:272]
+[LC:273][15:38:22] Error handling connection: Broken pipe
+[LC:274][15:38:22] TOKEN PASSED to 127.0.0.1:5001 [LC:274]
+[LC:275][15:38:22] TIMEOUT: No PONG from successor, assuming failure
+[LC:275][15:38:22] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:275][15:38:22] Attempting to repair topology...
+[LC:275][15:38:22] TIMEOUT: No PONG from successor, assuming failure
+[LC:275][15:38:22] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:275][15:38:22] Attempting to repair topology...
+[LC:279][15:38:23] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:279]
+[LC:279][15:38:23] TOKEN RECEIVED from 127.0.0.1:5001 [LC:279]
+[LC:279][15:38:23] TIMEOUT: No PONG from successor, assuming failure
+[LC:279][15:38:23] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:279][15:38:23] Attempting to repair topology...
+[LC:280][15:38:23] TOKEN PASSED to 127.0.0.1:5001 [LC:280]
+[LC:280][15:38:24] TIMEOUT: No PONG from successor, assuming failure
+[LC:280][15:38:24] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:280][15:38:24] Attempting to repair topology...
+[LC:283][15:38:24] RECEIVED: PING from 127.0.0.1:5001 [LC:283]
+[LC:284][15:38:24] Error handling connection: Broken pipe
+[LC:285][15:38:24] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:285]
+[LC:285][15:38:24] TOKEN RECEIVED from 127.0.0.1:5001 [LC:285]
+[LC:286][15:38:24] TIMEOUT: No PONG from successor, assuming failure
+[LC:286][15:38:24] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:286][15:38:24] Attempting to repair topology...
+[LC:287][15:38:24] TOKEN PASSED to 127.0.0.1:5001 [LC:287]
+[LC:287][15:38:25] TIMEOUT: No PONG from successor, assuming failure
+[LC:287][15:38:25] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:287][15:38:25] Attempting to repair topology...
+[LC:291][15:38:25] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:291]
+[LC:291][15:38:25] TOKEN RECEIVED from 127.0.0.1:5001 [LC:291]
+[LC:291][15:38:25] TIMEOUT: No PONG from successor, assuming failure
+[LC:291][15:38:25] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:291][15:38:25] Attempting to repair topology...
+[LC:292][15:38:25] TOKEN PASSED to 127.0.0.1:5001 [LC:292]
+[LC:292][15:38:26] TIMEOUT: No PONG from successor, assuming failure
+[LC:292][15:38:26] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:292][15:38:26] Attempting to repair topology...
+[LC:295][15:38:26] RECEIVED: PING from 127.0.0.1:5001 [LC:295]
+[LC:296][15:38:26] Error handling connection: Broken pipe
+[LC:297][15:38:26] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:297]
+[LC:297][15:38:26] TOKEN RECEIVED from 127.0.0.1:5001 [LC:297]
+[LC:298][15:38:26] TIMEOUT: No PONG from successor, assuming failure
+[LC:298][15:38:26] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:298][15:38:26] Attempting to repair topology...
+[LC:299][15:38:26] TOKEN PASSED to 127.0.0.1:5001 [LC:299]
+[LC:299][15:38:27] TIMEOUT: No PONG from successor, assuming failure
+[LC:299][15:38:27] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:299][15:38:27] Attempting to repair topology...
+[LC:303][15:38:27] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:303]
+[LC:303][15:38:27] TOKEN RECEIVED from 127.0.0.1:5001 [LC:303]
+[LC:303][15:38:27] TIMEOUT: No PONG from successor, assuming failure
+[LC:303][15:38:27] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:303][15:38:27] Attempting to repair topology...
+[LC:303][15:38:28] TIMEOUT: No PONG from successor, assuming failure
+[LC:303][15:38:28] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:303][15:38:28] Attempting to repair topology...
+[LC:304][15:38:28] TOKEN PASSED to 127.0.0.1:5001 [LC:304]
+[LC:307][15:38:28] RECEIVED: PING from 127.0.0.1:5001 [LC:307]
+[LC:308][15:38:28] Error handling connection: Broken pipe
+[LC:309][15:38:28] TIMEOUT: No PONG from successor, assuming failure
+[LC:309][15:38:28] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:309][15:38:28] Attempting to repair topology...
+[LC:313][15:38:28] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:313]
+[LC:313][15:38:28] TOKEN RECEIVED from 127.0.0.1:5001 [LC:313]
+[LC:313][15:38:29] TIMEOUT: No PONG from successor, assuming failure
+[LC:313][15:38:29] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:313][15:38:29] Attempting to repair topology...
+[LC:314][15:38:29] TOKEN PASSED to 127.0.0.1:5001 [LC:314]
+[LC:314][15:38:29] TIMEOUT: No PONG from successor, assuming failure
+[LC:314][15:38:29] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:314][15:38:29] Attempting to repair topology...
+[LC:317][15:38:29] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:317]
+[LC:317][15:38:29] TOKEN RECEIVED from 127.0.0.1:5001 [LC:317]
+[LC:317][15:38:30] TIMEOUT: No PONG from successor, assuming failure
+[LC:317][15:38:30] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:317][15:38:30] Attempting to repair topology...
+[LC:318][15:38:30] RECEIVED: PING from 127.0.0.1:5001 [LC:318]
+[LC:319][15:38:30] Error handling connection: Broken pipe
+[LC:320][15:38:30] TOKEN PASSED to 127.0.0.1:5001 [LC:320]
+[LC:321][15:38:30] TIMEOUT: No PONG from successor, assuming failure
+[LC:321][15:38:30] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:321][15:38:30] Attempting to repair topology...
+[LC:325][15:38:30] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:325]
+[LC:325][15:38:30] TOKEN RECEIVED from 127.0.0.1:5001 [LC:325]
+[LC:325][15:38:31] TIMEOUT: No PONG from successor, assuming failure
+[LC:325][15:38:31] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:325][15:38:31] Attempting to repair topology...
+[LC:326][15:38:31] TOKEN PASSED to 127.0.0.1:5001 [LC:326]
+[LC:326][15:38:31] TIMEOUT: No PONG from successor, assuming failure
+[LC:326][15:38:31] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:326][15:38:31] Attempting to repair topology...
+[LC:329][15:38:32] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:329]
+[LC:329][15:38:32] TOKEN RECEIVED from 127.0.0.1:5001 [LC:329]
+[LC:329][15:38:32] TIMEOUT: No PONG from successor, assuming failure
+[LC:329][15:38:32] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:329][15:38:32] Attempting to repair topology...
+[LC:330][15:38:32] RECEIVED: PING from 127.0.0.1:5001 [LC:330]
+[LC:331][15:38:32] Error handling connection: Broken pipe
+[LC:332][15:38:32] TOKEN PASSED to 127.0.0.1:5001 [LC:332]
+[LC:333][15:38:32] TIMEOUT: No PONG from successor, assuming failure
+[LC:333][15:38:32] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:333][15:38:32] Attempting to repair topology...
+[LC:337][15:38:33] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:337]
+[LC:337][15:38:33] TOKEN RECEIVED from 127.0.0.1:5001 [LC:337]
+[LC:337][15:38:33] TIMEOUT: No PONG from successor, assuming failure
+[LC:337][15:38:33] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:337][15:38:33] Attempting to repair topology...
+[LC:338][15:38:33] TOKEN PASSED to 127.0.0.1:5001 [LC:338]
+[LC:338][15:38:33] TIMEOUT: No PONG from successor, assuming failure
+[LC:338][15:38:33] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:338][15:38:33] Attempting to repair topology...
+[LC:338][15:38:34] TIMEOUT: No PONG from successor, assuming failure
+[LC:338][15:38:34] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:338][15:38:34] Attempting to repair topology...
+[LC:341][15:38:34] RECEIVED: PING from 127.0.0.1:5001 [LC:341]
+[LC:342][15:38:34] Error handling connection: Broken pipe
+[LC:343][15:38:34] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:343]
+[LC:343][15:38:34] TOKEN RECEIVED from 127.0.0.1:5001 [LC:343]
+[LC:344][15:38:34] TIMEOUT: No PONG from successor, assuming failure
+[LC:344][15:38:34] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:344][15:38:34] Attempting to repair topology...
+[LC:345][15:38:34] TOKEN PASSED to 127.0.0.1:5001 [LC:345]
+[LC:345][15:38:35] TIMEOUT: No PONG from successor, assuming failure
+[LC:345][15:38:35] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:345][15:38:35] Attempting to repair topology...
+[LC:349][15:38:35] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:349]
+[LC:349][15:38:35] TOKEN RECEIVED from 127.0.0.1:5001 [LC:349]
+[LC:349][15:38:35] TIMEOUT: No PONG from successor, assuming failure
+[LC:349][15:38:35] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:349][15:38:35] Attempting to repair topology...
+[LC:350][15:38:35] TOKEN PASSED to 127.0.0.1:5001 [LC:350]
+[LC:350][15:38:36] TIMEOUT: No PONG from successor, assuming failure
+[LC:350][15:38:36] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:350][15:38:36] Attempting to repair topology...
+[LC:353][15:38:36] RECEIVED: PING from 127.0.0.1:5001 [LC:353]
+[LC:354][15:38:36] Error handling connection: Broken pipe
+[LC:355][15:38:36] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:355]
+[LC:355][15:38:36] TOKEN RECEIVED from 127.0.0.1:5001 [LC:355]
+[LC:356][15:38:36] TIMEOUT: No PONG from successor, assuming failure
+[LC:356][15:38:36] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:356][15:38:36] Attempting to repair topology...
+[LC:357][15:38:37] TOKEN PASSED to 127.0.0.1:5001 [LC:357]
+[LC:357][15:38:37] TIMEOUT: No PONG from successor, assuming failure
+[LC:357][15:38:37] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:357][15:38:37] Attempting to repair topology...
+[LC:361][15:38:37] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:361]
+[LC:361][15:38:37] TOKEN RECEIVED from 127.0.0.1:5001 [LC:361]
+[LC:361][15:38:37] TIMEOUT: No PONG from successor, assuming failure
+[LC:361][15:38:37] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:361][15:38:37] Attempting to repair topology...
+[LC:362][15:38:38] TOKEN PASSED to 127.0.0.1:5001 [LC:362]
+[LC:362][15:38:38] TIMEOUT: No PONG from successor, assuming failure
+[LC:362][15:38:38] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:362][15:38:38] Attempting to repair topology...
+[LC:365][15:38:38] RECEIVED: PING from 127.0.0.1:5001 [LC:365]
+[LC:366][15:38:38] Error handling connection: Broken pipe
+[LC:367][15:38:38] TIMEOUT: No PONG from successor, assuming failure
+[LC:367][15:38:38] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:367][15:38:38] Attempting to repair topology...
+[LC:371][15:38:38] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:371]
+[LC:371][15:38:38] TOKEN RECEIVED from 127.0.0.1:5001 [LC:371]
+[LC:371][15:38:39] TIMEOUT: No PONG from successor, assuming failure
+[LC:371][15:38:39] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:371][15:38:39] Attempting to repair topology...
+[LC:372][15:38:39] TOKEN PASSED to 127.0.0.1:5001 [LC:372]
+[LC:372][15:38:39] TIMEOUT: No PONG from successor, assuming failure
+[LC:372][15:38:39] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:372][15:38:39] Attempting to repair topology...
+[LC:375][15:38:39] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:375]
+[LC:375][15:38:39] TOKEN RECEIVED from 127.0.0.1:5001 [LC:375]
+[LC:375][15:38:40] TIMEOUT: No PONG from successor, assuming failure
+[LC:375][15:38:40] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:375][15:38:40] Attempting to repair topology...
+[LC:376][15:38:40] RECEIVED: PING from 127.0.0.1:5001 [LC:376]
+[LC:377][15:38:40] Error handling connection: Broken pipe
+[LC:378][15:38:40] TOKEN PASSED to 127.0.0.1:5001 [LC:378]
+[LC:379][15:38:40] TIMEOUT: No PONG from successor, assuming failure
+[LC:379][15:38:40] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:379][15:38:40] Attempting to repair topology...
+[LC:383][15:38:41] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:383]
+[LC:383][15:38:41] TOKEN RECEIVED from 127.0.0.1:5001 [LC:383]
+[LC:383][15:38:41] TIMEOUT: No PONG from successor, assuming failure
+[LC:383][15:38:41] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:383][15:38:41] Attempting to repair topology...
+[LC:384][15:38:41] TOKEN PASSED to 127.0.0.1:5001 [LC:384]
+[LC:384][15:38:41] TIMEOUT: No PONG from successor, assuming failure
+[LC:384][15:38:41] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:384][15:38:41] Attempting to repair topology...
+[LC:387][15:38:42] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:387]
+[LC:387][15:38:42] TOKEN RECEIVED from 127.0.0.1:5001 [LC:387]
+[LC:387][15:38:42] TIMEOUT: No PONG from successor, assuming failure
+[LC:387][15:38:42] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:387][15:38:42] Attempting to repair topology...
+[LC:388][15:38:42] RECEIVED: PING from 127.0.0.1:5001 [LC:388]
+[LC:389][15:38:42] Error handling connection: Broken pipe
+[LC:390][15:38:42] TOKEN PASSED to 127.0.0.1:5001 [LC:390]
+[LC:391][15:38:42] TIMEOUT: No PONG from successor, assuming failure
+[LC:391][15:38:42] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:391][15:38:42] Attempting to repair topology...
+[LC:391][15:38:43] TIMEOUT: No PONG from successor, assuming failure
+[LC:391][15:38:43] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:391][15:38:43] Attempting to repair topology...
+[LC:395][15:38:43] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:395]
+[LC:395][15:38:43] TOKEN RECEIVED from 127.0.0.1:5001 [LC:395]
+[LC:395][15:38:43] TIMEOUT: No PONG from successor, assuming failure
+[LC:395][15:38:43] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:395][15:38:43] Attempting to repair topology...
+[LC:396][15:38:43] TOKEN PASSED to 127.0.0.1:5001 [LC:396]
+[LC:396][15:38:44] TIMEOUT: No PONG from successor, assuming failure
+[LC:396][15:38:44] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:396][15:38:44] Attempting to repair topology...
+[LC:399][15:38:44] RECEIVED: PING from 127.0.0.1:5001 [LC:399]
+[LC:400][15:38:44] Error handling connection: Broken pipe
+[LC:401][15:38:44] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:401]
+[LC:401][15:38:44] TOKEN RECEIVED from 127.0.0.1:5001 [LC:401]
+[LC:402][15:38:44] TIMEOUT: No PONG from successor, assuming failure
+[LC:402][15:38:44] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:402][15:38:44] Attempting to repair topology...
+[LC:403][15:38:44] TOKEN PASSED to 127.0.0.1:5001 [LC:403]
+[LC:403][15:38:45] TIMEOUT: No PONG from successor, assuming failure
+[LC:403][15:38:45] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:403][15:38:45] Attempting to repair topology...
+[LC:407][15:38:45] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:407]
+[LC:407][15:38:45] TOKEN RECEIVED from 127.0.0.1:5001 [LC:407]
+[LC:407][15:38:45] TIMEOUT: No PONG from successor, assuming failure
+[LC:407][15:38:45] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:407][15:38:45] Attempting to repair topology...
+[LC:408][15:38:46] TOKEN PASSED to 127.0.0.1:5001 [LC:408]
+[LC:408][15:38:46] TIMEOUT: No PONG from successor, assuming failure
+[LC:408][15:38:46] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:408][15:38:46] Attempting to repair topology...
+[LC:411][15:38:46] RECEIVED: PING from 127.0.0.1:5001 [LC:411]
+[LC:412][15:38:46] Error handling connection: Broken pipe
+[LC:413][15:38:46] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:413]
+[LC:413][15:38:46] TOKEN RECEIVED from 127.0.0.1:5001 [LC:413]
+[LC:414][15:38:46] TIMEOUT: No PONG from successor, assuming failure
+[LC:414][15:38:46] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:414][15:38:46] Attempting to repair topology...
+[LC:415][15:38:47] TOKEN PASSED to 127.0.0.1:5001 [LC:415]
+[LC:415][15:38:47] TIMEOUT: No PONG from successor, assuming failure
+[LC:415][15:38:47] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:415][15:38:47] Attempting to repair topology...
+[LC:415][15:38:47] TIMEOUT: No PONG from successor, assuming failure
+[LC:415][15:38:47] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:415][15:38:47] Attempting to repair topology...
+[LC:419][15:38:47] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:419]
+[LC:419][15:38:47] TOKEN RECEIVED from 127.0.0.1:5001 [LC:419]
+[LC:419][15:38:48] TIMEOUT: No PONG from successor, assuming failure
+[LC:419][15:38:48] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:419][15:38:48] Attempting to repair topology...
+[LC:420][15:38:48] RECEIVED: PING from 127.0.0.1:5001 [LC:420]
+[LC:421][15:38:48] Error handling connection: Broken pipe
+[LC:422][15:38:48] TOKEN PASSED to 127.0.0.1:5001 [LC:422]
+[LC:423][15:38:48] TIMEOUT: No PONG from successor, assuming failure
+[LC:423][15:38:48] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:423][15:38:48] Attempting to repair topology...
+[LC:427][15:38:48] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:427]
+[LC:427][15:38:48] TOKEN RECEIVED from 127.0.0.1:5001 [LC:427]
+[LC:427][15:38:49] TIMEOUT: No PONG from successor, assuming failure
+[LC:427][15:38:49] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:427][15:38:49] Attempting to repair topology...
+[LC:428][15:38:49] TOKEN PASSED to 127.0.0.1:5001 [LC:428]
+[LC:428][15:38:49] TIMEOUT: No PONG from successor, assuming failure
+[LC:428][15:38:49] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:428][15:38:49] Attempting to repair topology...
+[LC:431][15:38:50] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:431]
+[LC:431][15:38:50] TOKEN RECEIVED from 127.0.0.1:5001 [LC:431]
+[LC:431][15:38:50] TIMEOUT: No PONG from successor, assuming failure
+[LC:431][15:38:50] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:431][15:38:50] Attempting to repair topology...
+[LC:432][15:38:50] RECEIVED: PING from 127.0.0.1:5001 [LC:432]
+[LC:433][15:38:50] Error handling connection: Broken pipe
+[LC:434][15:38:50] TOKEN PASSED to 127.0.0.1:5001 [LC:434]
+[LC:435][15:38:50] TIMEOUT: No PONG from successor, assuming failure
+[LC:435][15:38:50] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:435][15:38:50] Attempting to repair topology...
+[LC:439][15:38:51] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:439]
+[LC:439][15:38:51] TOKEN RECEIVED from 127.0.0.1:5001 [LC:439]
+[LC:439][15:38:51] TIMEOUT: No PONG from successor, assuming failure
+[LC:439][15:38:51] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:439][15:38:51] Attempting to repair topology...
+[LC:440][15:38:51] TOKEN PASSED to 127.0.0.1:5001 [LC:440]
+[LC:440][15:38:51] TIMEOUT: No PONG from successor, assuming failure
+[LC:440][15:38:51] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:440][15:38:51] Attempting to repair topology...
+[LC:443][15:38:52] RECEIVED: TOKEN from 127.0.0.1:5001 [LC:443]
+[LC:443][15:38:52] TOKEN RECEIVED from 127.0.0.1:5001 [LC:443]
+[LC:443][15:38:52] TIMEOUT: No PONG from successor, assuming failure
+[LC:443][15:38:52] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:443][15:38:52] Attempting to repair topology...
+[LC:444][15:38:52] RECEIVED: PING from 127.0.0.1:5001 [LC:444]
+[LC:445][15:38:52] Error handling connection: Broken pipe
+[LC:446][15:38:52] TIMEOUT: No PONG from successor, assuming failure
+[LC:446][15:38:52] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:446][15:38:52] Attempting to repair topology...
+[LC:447][15:38:52] TOKEN PASSED to 127.0.0.1:5001 [LC:447]
+[LC:447][15:38:53] TIMEOUT: No PONG from successor, assuming failure
+[LC:447][15:38:53] FAILURE DETECTED: Successor 127.0.0.1:5001 failed
+[LC:447][15:38:53] Attempting to repair topology...
