@@ -37,9 +37,6 @@ public class RingTopology {
         return nextNode.equals(myself);
     }
 
-    /**
-     * Add a node to the topology table.
-     */
     public void addNode(NodeInfo node) {
         if (!allNodes.contains(node)) {
             allNodes.add(node);
@@ -47,26 +44,15 @@ public class RingTopology {
         }
     }
 
-    /**
-     * Remove a failed node from the topology table.
-     */
     public void removeNode(NodeInfo node) {
         allNodes.remove(node);
         Logger.log("Topology table: Removed node " + node + ". Total nodes: " + allNodes.size());
     }
 
-    /**
-     * Get all known nodes (for broadcasting topology).
-     */
     public List<NodeInfo> getAllNodes() {
         return new ArrayList<>(allNodes);
     }
 
-    /**
-     * Update the full topology table (received from another node).
-     * Syncs our list with the received list - removes nodes not in received list,
-     * adds nodes that are in received list but not in ours.
-     */
     public void updateAllNodes(List<NodeInfo> nodes) {
         int sizeBefore = allNodes.size();
 
@@ -88,10 +74,6 @@ public class RingTopology {
         }
     }
 
-    /**
-     * Find the next live node after the failed node.
-     * Returns nodes in order after 'failedNode' (excluding self and failedNode).
-     */
     public List<NodeInfo> getCandidatesAfter(NodeInfo failedNode) {
         List<NodeInfo> candidates = new ArrayList<>();
 

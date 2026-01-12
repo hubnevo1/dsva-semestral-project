@@ -11,9 +11,6 @@ public record Message(Type type, NodeInfo sender, NodeInfo target, Object payloa
         TOKEN, // Passing the mutex token
         CHAT, // Chat message
         PING, // Heartbeat / check alive
-        PONG, // Response to heartbeat
-        ELECTION, // For leader election / token regeneration
-        HELLO, // Initial handshake
         UPDATE_NEIGHBORS, // Update next/prev pointers
         UPDATE_PREV, // Tell a node who their new prev is
         TOPOLOGY_UPDATE // Full topology table sync

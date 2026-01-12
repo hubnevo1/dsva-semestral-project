@@ -15,14 +15,13 @@ public class SocketClient {
         // Simulate delay before sending
         DelaySimulator.waitIfRequired();
 
-        try (Socket socket = new Socket(target.getIp(), target.getPort());
-                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
+        try (Socket socket = new Socket(target.ip(), target.port());
+             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream())) {
 
             out.writeObject(message);
             out.flush();
             return true;
         } catch (IOException e) {
-            // Don't print full stack trace for expected connection failures
             Logger.log("Send failed to " + target + ": " + e.getMessage());
             return false;
         }

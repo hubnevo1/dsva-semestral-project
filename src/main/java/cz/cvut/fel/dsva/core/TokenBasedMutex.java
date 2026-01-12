@@ -1,6 +1,7 @@
 package cz.cvut.fel.dsva.core;
 
 import cz.cvut.fel.dsva.utils.Logger;
+import lombok.Getter;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -11,15 +12,15 @@ public class TokenBasedMutex {
     private final Condition tokenReceived = lock.newCondition();
     private boolean hasToken = false;
     private Token currentToken = null;
-    private long lastSeenGenerationId = 0; // Track the highest generation seen
+    @Getter
+    private long lastSeenGenerationId = 0;
 
     public void receiveToken(Token token) {
         lock.lock();
         try {
             // Check if this token is newer than what we've seen
             if (token.getGenerationId() < lastSeenGenerationId) {
-                Logger.log("Discarding old token (gen=" + token.getGenerationId() +
-                        "), current gen=" + lastSeenGenerationId);
+                Logger.log("Discarding old token (gen=" + token.getGenerationId() + "), current gen=" + lastSeenGenerationId);
                 return;
             }
 
@@ -68,10 +69,6 @@ public class TokenBasedMutex {
         }
     }
 
-    /**
-     * Regenerates a new token with a new (higher) generation ID.
-     * Old tokens will be automatically discarded by other nodes.
-     */
     public Token regenerateToken() {
         lock.lock();
         try {
@@ -82,15 +79,6 @@ public class TokenBasedMutex {
             Logger.log("Token REGENERATED: " + newToken);
             tokenReceived.signalAll();
             return newToken;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    public long getLastSeenGenerationId() {
-        lock.lock();
-        try {
-            return lastSeenGenerationId;
         } finally {
             lock.unlock();
         }

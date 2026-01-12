@@ -14,7 +14,6 @@ public class Token implements Serializable {
 
     @Getter
     private final long generationId;
-
     @Getter
     private final String hash;
 

@@ -207,11 +207,10 @@ public class Node implements MessageHandler {
     public void revive() {
         if (isKilled) {
             isKilled = false;
+            lastTokenSeenTime = System.currentTimeMillis(); // Reset timeout
             try {
                 socketServer.start(); // Restart listening
                 Logger.log("NODE REVIVED. Communication restored.");
-                // Re-joining logic might be needed if we were kicked out?
-                // But specification says "revive" just restores functionality.
             } catch (IOException e) {
                 Logger.error("Failed to restart server", e);
             }
@@ -357,7 +356,7 @@ public class Node implements MessageHandler {
                 break;
             case CHAT:
                 if (message.payload() instanceof ChatMessage cm) {
-                    if (!cm.getFrom().equals(myself.getIp() + ":" + myself.getPort())) { // Don't re-add own message if
+                    if (!cm.getFrom().equals(myself.ip() + ":" + myself.port())) { // Don't re-add own message if
                                                                                          // looped back
                         chatManager.addMessage(cm);
                     }
@@ -384,12 +383,10 @@ public class Node implements MessageHandler {
                     @SuppressWarnings("unchecked")
                     java.util.List<NodeInfo> nodes = (java.util.List<NodeInfo>) message.payload();
 
-                    int oldSize = topology.getAllNodes().size();
                     NodeInfo currentNext = topology.getNextNode();
                     boolean nextWasRemoved = !currentNext.equals(myself) && !nodes.contains(currentNext);
 
                     topology.updateAllNodes(nodes);
-                    int newSize = topology.getAllNodes().size();
 
                     // If our Next was removed, find a new Next from the updated node list
                     if (nextWasRemoved) {
@@ -403,19 +400,6 @@ public class Node implements MessageHandler {
                         }
                     }
 
-                    // If topology SHRUNK, proactively re-join to ensure we're in the ring
-                    // This handles orphaned nodes that weren't directly connected to the dead node
-                    if (newSize < oldSize && oldSize > 1) {
-                        NodeInfo sender = message.sender();
-                        if (!sender.equals(myself) && !sender.equals(topology.getPrevNode())) {
-                            Logger.log("Topology shrunk (" + oldSize + " -> " + newSize + "). Re-joining to " + sender
-                                    + "...");
-                            Message joinMsg = new Message(Message.Type.JOIN, myself, sender, null,
-                                    logicalClock.incrementAndGet());
-                            socketClient.sendMessage(sender, joinMsg);
-                        }
-                    }
-
                     // Reset timeout - topology is changing, give system time to stabilize
                     lastTokenSeenTime = System.currentTimeMillis();
                 }
@@ -423,9 +407,6 @@ public class Node implements MessageHandler {
             case PING:
                 // Heartbeat check - just acknowledge we're alive (no response needed for now)
                 // The sender uses successful TCP connection as proof of liveness
-                break;
-            case PONG:
-                // Response to heartbeat - not used in current implementation
                 break;
             case UPDATE_PREV:
                 // Another node is telling us our new prev
@@ -522,7 +503,7 @@ public class Node implements MessageHandler {
     }
 
     public void sendChatMessage(String content) {
-        ChatMessage chatMsg = new ChatMessage(myself.getIp() + ":" + myself.getPort(), content);
+        ChatMessage chatMsg = new ChatMessage(myself.ip() + ":" + myself.port(), content);
         chatManager.addMessage(chatMsg);
         pendingMessages.add(chatMsg);
         Logger.log("Message queued. Waiting for token...");

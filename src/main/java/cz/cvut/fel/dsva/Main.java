@@ -25,7 +25,7 @@ public class Main {
                 Logger.log("Attempting to join " + joinIp + ":" + joinPort);
                 node.join(joinIp, joinPort);
             } else {
-                // First node / bootstrap - IS the leader
+                // First node - IS the leader
                 node.start(true);
             }
 

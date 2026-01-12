@@ -70,7 +70,7 @@ wait_for_node() {
 }
 
 echo "=============================================="
-echo "   DSVA DISTRIBUTED CHAT DEMONSTRATION"
+echo "# DSVA DISTRIBUTED CHAT DEMONSTRATION"
 echo "=============================================="
 echo ""
 echo "This script demonstrates:"
@@ -82,9 +82,7 @@ echo "  5. Token regeneration"
 echo "  6. Critical section (mutex) operations"
 echo ""
 
-# ============================================
-# BUILD PROJECT
-# ============================================
+
 echo "####################################################"
 echo "# BUILDING PROJECT"
 echo "####################################################"
@@ -130,9 +128,7 @@ echo ">>> All $NUM_NODES nodes started successfully!"
 echo ">>> Logs available in: $LOG_DIR/"
 sleep $SLEEP_TIME
 
-# ============================================
-# PHASE 1: Check initial status
-# ============================================
+
 echo ""
 echo "####################################################"
 echo "# PHASE 1: CHECK INITIAL NODE STATUS"
@@ -142,9 +138,7 @@ for i in $(seq 1 $NUM_NODES); do
     api_call "Status of Node $i" "http://$BASE_IP:${NODE_API_PORT[$i]}/status"
 done
 
-# ============================================
-# PHASE 2: Demonstrate chat functionality
-# ============================================
+
 echo ""
 echo "####################################################"
 echo "# PHASE 2: CHAT MESSAGE BROADCASTING"
@@ -159,9 +153,7 @@ sleep $SLEEP_TIME
 api_call "Check status on Node 5 to see received messages" "http://$BASE_IP:${NODE_API_PORT[5]}/status"
 sleep $SLEEP_TIME
 
-# ============================================
-# PHASE 3: Demonstrate Critical Section
-# ============================================
+
 echo ""
 echo "####################################################"
 echo "# PHASE 3: CRITICAL SECTION (MUTEX) OPERATIONS"
@@ -179,9 +171,7 @@ sleep 2
 api_call "Node 2 leaves critical section (releases token)" "http://$BASE_IP:${NODE_API_PORT[2]}/leaveCS"
 sleep $SLEEP_TIME
 
-# ============================================
-# PHASE 4: Demonstrate network delay
-# ============================================
+
 echo ""
 echo "####################################################"
 echo "# PHASE 4: NETWORK DELAY SIMULATION"
@@ -196,9 +186,7 @@ sleep 3
 api_call "Reset delay on Node 3" "http://$BASE_IP:${NODE_API_PORT[3]}/setDelayMs?ms=0"
 sleep $SLEEP_TIME
 
-# ============================================
-# PHASE 5: Node failure and ring repair
-# ============================================
+
 echo ""
 echo "####################################################"
 echo "# PHASE 5: NODE FAILURE AND RING REPAIR"
@@ -208,11 +196,11 @@ api_call "Status before failure - Node 1" "http://$BASE_IP:${NODE_API_PORT[1]}/s
 sleep 1
 
 api_call "KILL Node 3 (simulate crash)" "http://$BASE_IP:${NODE_API_PORT[3]}/kill"
-sleep 1
 
 echo ""
-echo ">>> Waiting for ring repair and token regeneration..."
-sleep 5
+echo ">>> Waiting for token timeout detection and ring repair (~15 seconds)..."
+echo ">>> Token timeout is 10s, plus time for 3 consecutive timeouts and repair."
+sleep 15
 
 api_call "Status of Node 1 after repair" "http://$BASE_IP:${NODE_API_PORT[1]}/status"
 sleep 1
@@ -220,12 +208,10 @@ sleep 1
 api_call "Status of Node 4 after repair" "http://$BASE_IP:${NODE_API_PORT[4]}/status"
 sleep 1
 
-api_call "Send chat message after failure (should still work)" "http://$BASE_IP:${NODE_API_PORT[1]}/chat?msg=Message%20after%20Node%203%20failure"
+api_call "Send chat message after failure" "http://$BASE_IP:${NODE_API_PORT[1]}/chat?msg=Message%20after%20Node%203%20failure"
 sleep $SLEEP_TIME
 
-# ============================================
-# PHASE 6: Node recovery
-# ============================================
+
 echo ""
 echo "####################################################"
 echo "# PHASE 6: NODE RECOVERY (REVIVE)"
@@ -243,9 +229,7 @@ sleep 1
 api_call "Send chat from recovered Node 3" "http://$BASE_IP:${NODE_API_PORT[3]}/chat?msg=Node%203%20is%20back!"
 sleep $SLEEP_TIME
 
-# ============================================
-# PHASE 7: Final status check
-# ============================================
+
 echo ""
 echo "####################################################"
 echo "# PHASE 7: FINAL STATUS CHECK"
@@ -255,12 +239,9 @@ for i in $(seq 1 $NUM_NODES); do
     api_call "Final status of Node $i" "http://$BASE_IP:${NODE_API_PORT[$i]}/status"
 done
 
-# ============================================
-# Summary
-# ============================================
 echo ""
 echo "=============================================="
-echo "   DEMONSTRATION COMPLETE"
+echo "# SUMMARY"
 echo "=============================================="
 echo ""
 echo "This demonstration showed:"
@@ -274,5 +255,3 @@ echo "  ✓ Token regeneration after failure"
 echo "  ✓ Node recovery and re-join"
 echo ""
 echo "Log files are available in: $LOG_DIR/"
-echo ""
-read "Press ENTER to exit and shut down all nodes..."
