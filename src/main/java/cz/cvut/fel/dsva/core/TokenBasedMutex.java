@@ -1,6 +1,5 @@
-package cz.cvut.fel.dsva.mutex;
+package cz.cvut.fel.dsva.core;
 
-import cz.cvut.fel.dsva.core.Token;
 import cz.cvut.fel.dsva.utils.Logger;
 
 import java.util.concurrent.locks.Condition;
@@ -12,7 +11,7 @@ public class TokenBasedMutex {
     private final Condition tokenReceived = lock.newCondition();
     private boolean hasToken = false;
     private Token currentToken = null;
-    private long lastSeenGenerationId = 0; // Track highest generation seen
+    private long lastSeenGenerationId = 0; // Track the highest generation seen
 
     public void receiveToken(Token token) {
         lock.lock();

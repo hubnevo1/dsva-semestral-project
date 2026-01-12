@@ -14,16 +14,20 @@ public class SocketServer {
     private final int port;
     private final MessageHandler handler;
     private ServerSocket serverSocket;
-    private boolean running;
-    private final ExecutorService executor;
+    private volatile boolean running;
+    private ExecutorService executor;
 
     public SocketServer(int port, MessageHandler handler) {
         this.port = port;
         this.handler = handler;
-        this.executor = Executors.newCachedThreadPool();
     }
 
     public void start() throws IOException {
+        // Create new executor (in case we're restarting after stop)
+        if (executor == null || executor.isShutdown()) {
+            executor = Executors.newCachedThreadPool();
+        }
+
         serverSocket = new ServerSocket(port);
         running = true;
         Logger.log("Socket server started on port " + port);
@@ -32,7 +36,9 @@ public class SocketServer {
             while (running) {
                 try {
                     Socket clientSocket = serverSocket.accept();
-                    executor.submit(() -> handleConnection(clientSocket));
+                    if (running && executor != null && !executor.isShutdown()) {
+                        executor.submit(() -> handleConnection(clientSocket));
+                    }
                 } catch (IOException e) {
                     if (running) {
                         Logger.error("Error accepting connection: " + e.getMessage(), e);
@@ -62,12 +68,15 @@ public class SocketServer {
     public void stop() {
         running = false;
         try {
-            if (serverSocket != null) {
+            if (serverSocket != null && !serverSocket.isClosed()) {
                 serverSocket.close();
             }
         } catch (IOException e) {
             Logger.error("Error closing server socket", e);
         }
-        executor.shutdown();
+        if (executor != null && !executor.isShutdown()) {
+            executor.shutdownNow();
+            executor = null;
+        }
     }
 }

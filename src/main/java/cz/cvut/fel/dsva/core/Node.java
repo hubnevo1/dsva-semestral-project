@@ -3,7 +3,6 @@ package cz.cvut.fel.dsva.core;
 import cz.cvut.fel.dsva.api.RestApiServer;
 import cz.cvut.fel.dsva.chat.ChatManager;
 import cz.cvut.fel.dsva.chat.ChatMessage;
-import cz.cvut.fel.dsva.mutex.TokenBasedMutex;
 import cz.cvut.fel.dsva.network.MessageHandler;
 import cz.cvut.fel.dsva.network.SocketClient;
 import cz.cvut.fel.dsva.network.SocketServer;
@@ -138,7 +137,6 @@ public class Node implements MessageHandler {
                         Message ping = new Message(Message.Type.PING, myself, next, null,
                                 logicalClock.incrementAndGet());
                         if (!socketClient.sendMessage(next, ping)) {
-                            // Next is dead! Initiate repair
                             Logger.log("Next neighbor " + next + " is dead! Initiating repair...");
                             handleNeighborFailure(next);
                             consecutiveTimeouts = 0;
@@ -260,9 +258,6 @@ public class Node implements MessageHandler {
             NodeInfo next = topology.getNextNode();
 
             if (isKilled) {
-                // If killed while holding token, we lose it (simulated crash).
-                // Do not send it.
-                // The network must regenerate.
                 Logger.log("Node killed while holding token! Token lost.");
                 return;
             }
@@ -284,8 +279,6 @@ public class Node implements MessageHandler {
     }
 
     private void handleNeighborFailure(NodeInfo failedNode) {
-        Logger.log("Neighbor " + failedNode + " is unreachable! Initiating ring repair...");
-
         // Remove failed node from topology table
         topology.removeNode(failedNode);
 
@@ -381,6 +374,8 @@ public class Node implements MessageHandler {
                     // My prev is the sender (the node I joined)
                     topology.setPrevNode(message.sender());
                     Logger.log("Topology received from " + message.sender() + ". My Next: " + myNewNext);
+                    // Reset timeout - topology is changing, give system time to stabilize
+                    lastTokenSeenTime = System.currentTimeMillis();
                 }
                 break;
             case TOPOLOGY_UPDATE:
@@ -388,7 +383,41 @@ public class Node implements MessageHandler {
                 if (message.payload() instanceof java.util.List) {
                     @SuppressWarnings("unchecked")
                     java.util.List<NodeInfo> nodes = (java.util.List<NodeInfo>) message.payload();
+
+                    int oldSize = topology.getAllNodes().size();
+                    NodeInfo currentNext = topology.getNextNode();
+                    boolean nextWasRemoved = !currentNext.equals(myself) && !nodes.contains(currentNext);
+
                     topology.updateAllNodes(nodes);
+                    int newSize = topology.getAllNodes().size();
+
+                    // If our Next was removed, find a new Next from the updated node list
+                    if (nextWasRemoved) {
+                        Logger.log("My Next " + currentNext + " was removed. Finding new Next...");
+                        for (NodeInfo node : nodes) {
+                            if (!node.equals(myself)) {
+                                topology.setNextNode(node);
+                                Logger.log("New Next neighbor: " + node);
+                                break;
+                            }
+                        }
+                    }
+
+                    // If topology SHRUNK, proactively re-join to ensure we're in the ring
+                    // This handles orphaned nodes that weren't directly connected to the dead node
+                    if (newSize < oldSize && oldSize > 1) {
+                        NodeInfo sender = message.sender();
+                        if (!sender.equals(myself) && !sender.equals(topology.getPrevNode())) {
+                            Logger.log("Topology shrunk (" + oldSize + " -> " + newSize + "). Re-joining to " + sender
+                                    + "...");
+                            Message joinMsg = new Message(Message.Type.JOIN, myself, sender, null,
+                                    logicalClock.incrementAndGet());
+                            socketClient.sendMessage(sender, joinMsg);
+                        }
+                    }
+
+                    // Reset timeout - topology is changing, give system time to stabilize
+                    lastTokenSeenTime = System.currentTimeMillis();
                 }
                 break;
             case PING:
@@ -397,6 +426,13 @@ public class Node implements MessageHandler {
                 break;
             case PONG:
                 // Response to heartbeat - not used in current implementation
+                break;
+            case UPDATE_PREV:
+                // Another node is telling us our new prev
+                if (message.payload() instanceof NodeInfo newPrev) {
+                    topology.setPrevNode(newPrev);
+                    Logger.log("Prev updated to: " + newPrev);
+                }
                 break;
             default:
                 Logger.log("Unknown message type: " + message.type());
@@ -432,9 +468,14 @@ public class Node implements MessageHandler {
             newNodeNext = myself;
         } else {
             newNodeNext = oldNext;
+            // Tell oldNext that their new prev is S (the joining node)
+            Message updatePrevMsg = new Message(Message.Type.UPDATE_PREV, myself, newNode,
+                    logicalClock.incrementAndGet());
+            socketClient.sendMessage(oldNext, updatePrevMsg);
         }
 
-        // Send UPDATE_NEIGHBORS to S with its new Next
+        // Send UPDATE_NEIGHBORS to S with its new Next (payload = newNodeNext)
+        // The sender (myself) becomes S's prev
         Message resp = new Message(Message.Type.UPDATE_NEIGHBORS, myself, newNodeNext, logicalClock.incrementAndGet());
         socketClient.sendMessage(newNode, resp);
 
@@ -488,7 +529,19 @@ public class Node implements MessageHandler {
     }
 
     public String getStatus() {
-        return "Node: " + myself + "\nNext: " + topology.getNextNode() + "\nToken: " + mutex.hasToken() + "\nLC: "
-                + logicalClock.getTime();
+        StringBuilder sb = new StringBuilder();
+        sb.append("Node: ").append(myself).append("\n");
+        sb.append("Next: ").append(topology.getNextNode()).append("\n");
+        sb.append("Prev: ").append(topology.getPrevNode()).append("\n");
+        sb.append("Token: ").append(mutex.hasToken()).append("\n");
+        sb.append("LC: ").append(logicalClock.getTime()).append("\n");
+        sb.append("Killed: ").append(isKilled).append("\n");
+        sb.append("InCS: ").append(inCriticalSection).append("\n");
+        sb.append("Nodes: ").append(topology.getAllNodes().size()).append("\n");
+        sb.append("\nChat History:\n");
+        for (ChatMessage msg : chatManager.getHistory()) {
+            sb.append("  ").append(msg).append("\n");
+        }
+        return sb.toString();
     }
 }

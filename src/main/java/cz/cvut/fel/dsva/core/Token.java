@@ -4,6 +4,7 @@ import lombok.Getter;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Token implements Serializable {
@@ -14,12 +15,16 @@ public class Token implements Serializable {
     @Getter
     private final long generationId;
 
+    @Getter
+    private final String hash;
+
     public Token() {
         this.generationId = generationCounter.incrementAndGet();
+        this.hash = UUID.randomUUID().toString();
     }
 
     @Override
     public String toString() {
-        return "Token{gen=" + generationId + "}";
+        return "Token{id=" + generationId + ", hash=" + hash + "}";
     }
 }

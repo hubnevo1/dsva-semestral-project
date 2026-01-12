@@ -2,7 +2,8 @@ package cz.cvut.fel.dsva.core;
 
 import java.io.Serializable;
 
-public record Message(Type type, NodeInfo sender, NodeInfo target, Object payload, int logicalTime) implements Serializable {
+public record Message(Type type, NodeInfo sender, NodeInfo target, Object payload, int logicalTime)
+        implements Serializable {
 
     public enum Type {
         JOIN, // Request to join the ring
@@ -14,6 +15,7 @@ public record Message(Type type, NodeInfo sender, NodeInfo target, Object payloa
         ELECTION, // For leader election / token regeneration
         HELLO, // Initial handshake
         UPDATE_NEIGHBORS, // Update next/prev pointers
+        UPDATE_PREV, // Tell a node who their new prev is
         TOPOLOGY_UPDATE // Full topology table sync
     }
 
