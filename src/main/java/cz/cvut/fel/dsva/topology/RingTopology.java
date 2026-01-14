@@ -87,11 +87,15 @@ public class RingTopology {
         }
 
         if (failedIndex == -1) {
-            // Failed node not in list, return all except self
+            // Failed node not in list, return all except self and prevNode
             for (NodeInfo node : allNodes) {
-                if (!node.equals(myself) && !node.equals(failedNode)) {
+                if (!node.equals(myself) && !node.equals(failedNode) && !node.equals(prevNode)) {
                     candidates.add(node);
                 }
+            }
+            // Add prevNode last (fallback - only if all else fails)
+            if (prevNode != null && !prevNode.equals(myself) && !prevNode.equals(failedNode)) {
+                candidates.add(prevNode);
             }
             return candidates;
         }
@@ -101,9 +105,14 @@ public class RingTopology {
         for (int i = 1; i < size; i++) {
             int idx = (failedIndex + i) % size;
             NodeInfo candidate = allNodes.get(idx);
-            if (!candidate.equals(myself) && !candidate.equals(failedNode)) {
+            if (!candidate.equals(myself) && !candidate.equals(failedNode) && !candidate.equals(prevNode)) {
                 candidates.add(candidate);
             }
+        }
+
+        // Add prevNode as last resort (fallback to close the ring if no other nodes available)
+        if (prevNode != null && !prevNode.equals(myself) && !prevNode.equals(failedNode)) {
+            candidates.add(prevNode);
         }
 
         return candidates;

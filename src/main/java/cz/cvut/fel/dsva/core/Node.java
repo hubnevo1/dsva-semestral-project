@@ -337,7 +337,7 @@ public class Node implements MessageHandler {
     @Override
     public void handleMessage(Message message) {
         if (isKilled)
-            return; // Silent if killed
+            return;
 
         logicalClock.update(message.logicalTime());
         // Logger.log("Received " + message.type + " from " + message.sender);
@@ -356,8 +356,7 @@ public class Node implements MessageHandler {
                 break;
             case CHAT:
                 if (message.payload() instanceof ChatMessage cm) {
-                    if (!cm.getFrom().equals(myself.ip() + ":" + myself.port())) { // Don't re-add own message if
-                                                                                         // looped back
+                    if (!cm.getFrom().equals(myself.ip() + ":" + myself.port())) {
                         chatManager.addMessage(cm);
                     }
                     // Forward if not back to sender
@@ -367,12 +366,15 @@ public class Node implements MessageHandler {
                 }
                 break;
             case UPDATE_NEIGHBORS:
-                // This is sent by the node we joined, telling us our Next
-                if (message.payload() instanceof NodeInfo myNewNext) {
-                    topology.setNextNode(myNewNext);
-                    // My prev is the sender (the node I joined)
-                    topology.setPrevNode(message.sender());
-                    Logger.log("Topology received from " + message.sender() + ". My Next: " + myNewNext);
+                // Handle neighbor updates (next and/or prev)
+                if (message.payload() instanceof NeighborUpdate update) {
+                    if (update.next() != null) {
+                        topology.setNextNode(update.next());
+                    }
+                    if (update.prev() != null) {
+                        topology.setPrevNode(update.prev());
+                    }
+                    Logger.log("Neighbors updated: Next=" + update.next() + ", Prev=" + update.prev());
                     // Reset timeout - topology is changing, give system time to stabilize
                     lastTokenSeenTime = System.currentTimeMillis();
                 }
@@ -407,13 +409,6 @@ public class Node implements MessageHandler {
             case PING:
                 // Heartbeat check - just acknowledge we're alive (no response needed for now)
                 // The sender uses successful TCP connection as proof of liveness
-                break;
-            case UPDATE_PREV:
-                // Another node is telling us our new prev
-                if (message.payload() instanceof NodeInfo newPrev) {
-                    topology.setPrevNode(newPrev);
-                    Logger.log("Prev updated to: " + newPrev);
-                }
                 break;
             default:
                 Logger.log("Unknown message type: " + message.type());
@@ -450,14 +445,14 @@ public class Node implements MessageHandler {
         } else {
             newNodeNext = oldNext;
             // Tell oldNext that their new prev is S (the joining node)
-            Message updatePrevMsg = new Message(Message.Type.UPDATE_PREV, myself, newNode,
-                    logicalClock.incrementAndGet());
+            Message updatePrevMsg = new Message(Message.Type.UPDATE_NEIGHBORS, myself, oldNext,
+                    new NeighborUpdate(null, newNode), logicalClock.incrementAndGet());
             socketClient.sendMessage(oldNext, updatePrevMsg);
         }
 
-        // Send UPDATE_NEIGHBORS to S with its new Next (payload = newNodeNext)
-        // The sender (myself) becomes S's prev
-        Message resp = new Message(Message.Type.UPDATE_NEIGHBORS, myself, newNodeNext, logicalClock.incrementAndGet());
+        // Send UPDATE_NEIGHBORS to S with its new Next and Prev
+        Message resp = new Message(Message.Type.UPDATE_NEIGHBORS, myself, newNode,
+                new NeighborUpdate(newNodeNext, myself), logicalClock.incrementAndGet());
         socketClient.sendMessage(newNode, resp);
 
         // Broadcast updated topology to ALL known nodes (including the new one)

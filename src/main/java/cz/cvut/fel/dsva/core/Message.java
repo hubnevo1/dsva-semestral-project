@@ -12,7 +12,6 @@ public record Message(Type type, NodeInfo sender, NodeInfo target, Object payloa
         CHAT, // Chat message
         PING, // Heartbeat / check alive
         UPDATE_NEIGHBORS, // Update next/prev pointers
-        UPDATE_PREV, // Tell a node who their new prev is
         TOPOLOGY_UPDATE // Full topology table sync
     }
 
