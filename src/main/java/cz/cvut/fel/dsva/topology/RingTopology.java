@@ -44,21 +44,6 @@ public class RingTopology {
         return nextNode.equals(myself);
     }
 
-    public synchronized NodeInfo promoteNextNext() {
-        NodeInfo failedNode = nextNode;
-        this.nextNode = nextNextNode;
-        this.nextNextNode = myself; // Will be updated by the new next node
-        Logger.log("Promoted nextNext to next. New next: " + nextNode + " (failed: " + failedNode + ")");
-        return failedNode;
-    }
-
-    public synchronized void promotePrevPrev() {
-        NodeInfo failedNode = prevNode;
-        this.prevNode = prevPrevNode;
-        this.prevPrevNode = myself; // Will be updated by the new prev node
-        Logger.log("Promoted prevPrev to prev. New prev: " + prevNode + " (failed: " + failedNode + ")");
-    }
-
     @Override
     public String toString() {
         return "RingTopology{" +

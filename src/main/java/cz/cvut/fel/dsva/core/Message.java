@@ -2,8 +2,7 @@ package cz.cvut.fel.dsva.core;
 
 import java.io.Serializable;
 
-public record Message(Type type, NodeInfo sender, NodeInfo target, Object payload, int logicalTime)
-        implements Serializable {
+public record Message(Type type, NodeInfo sender, NodeInfo target, Object payload, int logicalTime) implements Serializable {
 
     public enum Type {
         JOIN, // Request to join the ring

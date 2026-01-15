@@ -12,7 +12,6 @@ public class TokenBasedMutex {
     private final Condition tokenReceived = lock.newCondition();
     private boolean hasToken = false;
     private Token currentToken = null;
-    @Getter
     private long lastSeenGenerationId = 0;
 
     public void receiveToken(Token token) {
@@ -20,8 +19,7 @@ public class TokenBasedMutex {
         try {
             // Check if this token is newer than what we've seen
             if (token.getGenerationId() < lastSeenGenerationId) {
-                Logger.log("Discarding old token (gen=" + token.getGenerationId() + "), current gen="
-                        + lastSeenGenerationId);
+                Logger.log("Discarding old token (gen=" + token.getGenerationId() + "), current gen=" + lastSeenGenerationId);
                 return;
             }
 
