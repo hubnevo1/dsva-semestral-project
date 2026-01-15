@@ -177,15 +177,17 @@ echo "####################################################"
 echo "# PHASE 4: NETWORK DELAY SIMULATION"
 echo "####################################################"
 
-api_call "Set 500ms delay on Node 3" "http://$BASE_IP:${NODE_API_PORT[3]}/setDelayMs?ms=500"
-sleep $SLEEP_TIME
+api_call "Set 5s delay on Node 3" "http://$BASE_IP:${NODE_API_PORT[3]}/setDelayMs?ms=5000"
+sleep 1
 
 api_call "Node 1 sends message (will be delayed passing through Node 3)" "http://$BASE_IP:${NODE_API_PORT[1]}/chat?msg=Testing%20with%20delay"
-sleep 3
+sleep $SLEEP_TIME
+
+api_call "Status of Node 5 before message arrives" "http://$BASE_IP:${NODE_API_PORT[5]}/status"
+sleep 1
 
 api_call "Reset delay on Node 3" "http://$BASE_IP:${NODE_API_PORT[3]}/setDelayMs?ms=0"
 sleep $SLEEP_TIME
-
 
 echo ""
 echo "####################################################"

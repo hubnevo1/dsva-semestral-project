@@ -42,12 +42,6 @@ public class Node implements MessageHandler {
         this.apiServer = new RestApiServer(apiPort, this);
     }
 
-    /**
-     * Start the node.
-     * 
-     * @param isLeader true if this is the first node (bootstrap), false if joining
-     *                 existing network
-     */
     public void start(boolean isLeader) throws IOException {
         socketServer.start();
         apiServer.start();
@@ -143,7 +137,6 @@ public class Node implements MessageHandler {
                         } else {
                             // Next is alive, but we're not getting tokens
                             // If this happens multiple times, we're likely ORPHANED
-                            // (not in the active ring)
                             if (consecutiveTimeouts >= 3) {
                                 Logger.log(
                                         "Multiple timeouts while next is alive. I may be ORPHANED. Re-joining network...");
@@ -196,7 +189,7 @@ public class Node implements MessageHandler {
     public void kill() {
         if (!isKilled) {
             isKilled = true;
-            socketServer.stop(); // Stop listening
+            socketServer.stop();
             Logger.log("NODE KILLED (Simulated). Communication stopped.");
         }
     }
@@ -207,9 +200,9 @@ public class Node implements MessageHandler {
     public void revive() {
         if (isKilled) {
             isKilled = false;
-            lastTokenSeenTime = System.currentTimeMillis(); // Reset timeout
+            lastTokenSeenTime = System.currentTimeMillis();
             try {
-                socketServer.start(); // Restart listening
+                socketServer.start();
                 Logger.log("NODE REVIVED. Communication restored.");
             } catch (IOException e) {
                 Logger.error("Failed to restart server", e);
@@ -228,9 +221,6 @@ public class Node implements MessageHandler {
     }
 
     private void broadcastMessage(ChatMessage originalMsg) {
-        // Wrap in Message and send to Next.
-        // Ring broadcast ensures it goes around.
-        // We already added it locally? Yes, in sendChatMessage.
         Message netMsg = new Message(Message.Type.CHAT, myself, null, originalMsg, logicalClock.incrementAndGet());
 
         // Send to next
@@ -239,10 +229,6 @@ public class Node implements MessageHandler {
             boolean sent = socketClient.sendMessage(next, netMsg);
             if (!sent) {
                 Logger.log("Failed to broadcast message to " + next + ". Re-queuing.");
-                // Add back to head of queue if possible, or just add (order might flip, but
-                // better than loss)
-                // ConcurrentLinkedQueue doesn't support addFirst.
-                // For simplicity, add to end.
                 pendingMessages.add(originalMsg);
             }
         } else {
@@ -514,7 +500,7 @@ public class Node implements MessageHandler {
         sb.append("Killed: ").append(isKilled).append("\n");
         sb.append("InCS: ").append(inCriticalSection).append("\n");
         sb.append("Nodes: ").append(topology.getAllNodes().size()).append("\n");
-        sb.append("\nChat History:\n");
+        sb.append("Chat History:\n");
         for (ChatMessage msg : chatManager.getHistory()) {
             sb.append("  ").append(msg).append("\n");
         }
