@@ -29,6 +29,15 @@ public class Node implements MessageHandler {
     private volatile boolean inCriticalSection = false; // If true, hold token
     private volatile boolean wantCriticalSection = false; // API request to enter CS
 
+    private volatile int m = 0; // Last seen counter from PING or PONG
+    private volatile int nbPing = 0; // PING counter (positive)
+    private volatile int nbPong = 0; // PONG counter (negative)
+    private volatile boolean hasPing = false;
+    private volatile boolean hasPong = false;
+    private final Object misraLock = new Object();
+
+    private static final int MODULO_P = 1_000_000_000;
+
     public Node(String ip, int port, int apiPort) {
         this.myself = new NodeInfo(ip, port);
         this.logicalClock = new LogicalClock();
@@ -47,20 +56,39 @@ public class Node implements MessageHandler {
         apiServer.start();
 
         new Thread(this::tokenLoop).start();
+        new Thread(this::misraLoop).start(); // Start Misra Ping-Pong loop
 
         if (isLeader) {
-            Logger.log("Started as LEADER. Generating initial token.");
+            Logger.log("Started as LEADER. Generating initial token and Misra tokens.");
             mutex.regenerateToken();
+            initializeMisraAsLeader();
         } else {
-            Logger.log("Started as FOLLOWER. Will receive token from network.");
+            Logger.log("Started as FOLLOWER. Will receive tokens from network.");
+            initializeMisraAsFollower();
         }
-
-        // Start heartbeat thread for failure detection
-        new Thread(this::heartbeatLoop).start();
     }
 
-    private static final int TOKEN_TIMEOUT_MS = 10000; // 10 seconds without token = suspect failure
-    private volatile long lastTokenSeenTime = System.currentTimeMillis();
+    private void initializeMisraAsLeader() {
+        synchronized (misraLock) {
+            m = 1;
+            nbPing = 1;
+            nbPong = -1;
+            hasPing = true;
+            hasPong = true;
+            Logger.log("Misra initialized as LEADER: m=" + m + ", nbPing=" + nbPing + ", nbPong=" + nbPong);
+        }
+    }
+
+    private void initializeMisraAsFollower() {
+        synchronized (misraLock) {
+            m = 0;
+            nbPing = 0;
+            nbPong = 0;
+            hasPing = false;
+            hasPong = false;
+            Logger.log("Misra initialized as FOLLOWER: m=" + m);
+        }
+    }
 
     private void tokenLoop() {
         while (running) {
@@ -71,8 +99,6 @@ public class Node implements MessageHandler {
                 }
 
                 if (mutex.hasToken()) {
-                    lastTokenSeenTime = System.currentTimeMillis(); // Reset timeout
-
                     // 1. Send pending chat messages
                     while (!pendingMessages.isEmpty()) {
                         ChatMessage msg = pendingMessages.poll();
@@ -104,57 +130,33 @@ public class Node implements MessageHandler {
     }
 
     /**
-     * Heartbeat loop - periodically check if neighbors are alive.
-     * If we haven't seen the token in a while, the token holder may have crashed.
+     * Misra Ping-Pong loop - circulates PING and PONG tokens.
+     * Detects token loss and regenerates missing tokens.
      */
-    private void heartbeatLoop() {
-        int consecutiveTimeouts = 0;
-
+    private void misraLoop() {
         while (running) {
             try {
-                Thread.sleep(3000); // Check every 3 seconds
+                Thread.sleep(1000); // Check every second
 
-                if (isKilled || mutex.hasToken()) {
-                    consecutiveTimeouts = 0;
+                if (isKilled || topology.isAlone()) {
                     continue;
                 }
 
-                // Check if token is taking too long
-                long elapsed = System.currentTimeMillis() - lastTokenSeenTime;
-                if (elapsed > TOKEN_TIMEOUT_MS && !topology.isAlone()) {
-                    consecutiveTimeouts++;
-                    Logger.log("Token timeout #" + consecutiveTimeouts + "! Last seen " + (elapsed / 1000) + "s ago.");
-
-                    // Ping our next neighbor to see if they're alive
-                    NodeInfo next = topology.getNextNode();
-                    if (!next.equals(myself)) {
-                        Message ping = new Message(Message.Type.PING, myself, next, null,
-                                logicalClock.incrementAndGet());
-                        if (!socketClient.sendMessage(next, ping)) {
-                            Logger.log("Next neighbor " + next + " is dead! Initiating repair...");
-                            handleNeighborFailure(next);
-                            consecutiveTimeouts = 0;
-                        } else {
-                            // Next is alive, but we're not getting tokens
-                            // If this happens multiple times, ping our prev to check if we're orphaned
-                            if (consecutiveTimeouts >= 3) {
-                                Logger.log("Multiple timeouts. Checking if I'm orphaned...");
-                                NodeInfo prev = topology.getPrevNode();
-                                if (!prev.equals(myself)) {
-                                    Message pingPrev = new Message(Message.Type.PING, myself, prev, null,
-                                            logicalClock.incrementAndGet());
-                                    if (!socketClient.sendMessage(prev, pingPrev)) {
-                                        Logger.log("Prev neighbor " + prev + " is also dead! I may be isolated.");
-                                        // Try nextNext as last resort
-                                        attemptRecovery();
-                                    }
-                                }
-                                consecutiveTimeouts = 0;
-                            }
-                        }
+                synchronized (misraLock) {
+                    // Check for meeting: if we hold both PING and PONG
+                    if (hasPing && hasPong) {
+                        handleMisraMeeting();
                     }
-                } else {
-                    consecutiveTimeouts = 0;
+
+                    // Pass PING to next (if we have it)
+                    if (hasPing && !hasPong) { // Only pass if not meeting
+                        passPing();
+                    }
+
+                    // Pass PONG to prev (if we have it)
+                    if (hasPong && !hasPing) { // Only pass if not meeting
+                        passPong();
+                    }
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -163,48 +165,139 @@ public class Node implements MessageHandler {
     }
 
     /**
-     * Attempt recovery when we detect we're possibly isolated.
+     * Handle meeting of PING and PONG at this node.
+     * Increment nbPing, decrement nbPong.
      */
-    private void attemptRecovery() {
-        NodeInfo nextNext = topology.getNextNextNode();
-        if (!nextNext.equals(myself)) {
-            Message ping = new Message(Message.Type.PING, myself, nextNext, null, logicalClock.incrementAndGet());
-            if (socketClient.sendMessage(nextNext, ping)) {
-                Logger.log("Found live node via nextNext: " + nextNext + ". Re-joining...");
-                Message joinMsg = new Message(Message.Type.JOIN, myself, nextNext, null,
-                        logicalClock.incrementAndGet());
-                if (socketClient.sendMessage(nextNext, joinMsg)) {
-                    Logger.log("Re-join request sent to " + nextNext + ". Waiting for token...");
-                    lastTokenSeenTime = System.currentTimeMillis();
-                    return;
-                }
-            }
+    private void handleMisraMeeting() {
+        nbPing = modulo(nbPing + 1);
+        nbPong = modulo(nbPong - 1);
+        Logger.log("Misra MEETING: nbPing=" + nbPing + ", nbPong=" + nbPong);
+
+        // After meeting, pass both tokens
+        passPing();
+        passPong();
+    }
+
+    /**
+     * Pass PING token to next neighbor.
+     */
+    private void passPing() {
+        if (!hasPing)
+            return;
+
+        NodeInfo next = topology.getNextNode();
+        if (next.equals(myself)) {
+            // Alone, keep the token
+            return;
         }
 
-        // If we can't reach nextNext, try prevPrev
-        NodeInfo prevPrev = topology.getPrevPrevNode();
-        if (!prevPrev.equals(myself)) {
-            Message ping = new Message(Message.Type.PING, myself, prevPrev, null, logicalClock.incrementAndGet());
-            if (socketClient.sendMessage(prevPrev, ping)) {
-                Logger.log("Found live node via prevPrev: " + prevPrev + ". Re-joining...");
-                Message joinMsg = new Message(Message.Type.JOIN, myself, prevPrev, null,
-                        logicalClock.incrementAndGet());
-                if (socketClient.sendMessage(prevPrev, joinMsg)) {
-                    Logger.log("Re-join request sent to " + prevPrev + ". Waiting for token...");
-                    lastTokenSeenTime = System.currentTimeMillis();
-                    return;
-                }
-            }
+        hasPing = false;
+        Message msg = new Message(Message.Type.PING, myself, next,
+                new MisraToken(nbPing), logicalClock.incrementAndGet());
+        boolean sent = socketClient.sendMessage(next, msg);
+        if (!sent) {
+            // Failed to send, reclaim and handle failure
+            hasPing = true;
+            Logger.log("Failed to pass PING to " + next + ". Handling failure...");
+            handleNeighborFailure(next);
+        } else {
+            Logger.log("Passed PING(" + nbPing + ") to " + next);
+        }
+    }
+
+    /**
+     * Pass PONG token to prev neighbor.
+     */
+    private void passPong() {
+        if (!hasPong)
+            return;
+
+        NodeInfo prev = topology.getPrevNode();
+        if (prev.equals(myself)) {
+            // Alone, keep the token
+            return;
         }
 
-        // If we can't reach anyone, we're truly alone - regenerate token
-        Logger.log("Cannot reach any nodes. Generating token as lone node.");
-        topology.setNextNode(myself);
-        topology.setNextNextNode(myself);
-        topology.setPrevNode(myself);
-        topology.setPrevPrevNode(myself);
-        mutex.regenerateToken();
-        lastTokenSeenTime = System.currentTimeMillis();
+        hasPong = false;
+        Message msg = new Message(Message.Type.PONG, myself, prev,
+                new MisraToken(nbPong), logicalClock.incrementAndGet());
+        boolean sent = socketClient.sendMessage(prev, msg);
+        if (!sent) {
+            // Failed to send - prev is dead! Handle failure.
+            hasPong = true;
+            Logger.log("Failed to pass PONG to " + prev + ". Handling prev failure...");
+            handlePrevNeighborFailure(prev);
+        } else {
+            Logger.log("Passed PONG(" + nbPong + ") to " + prev);
+        }
+    }
+
+    /**
+     * Handle receiving PING token.
+     * Implements Misra detection: if m == nbPing, PONG was lost.
+     */
+    private void handlePingAlg(Message message) {
+        if (!(message.payload() instanceof MisraToken(int receivedNbPing)))
+            return;
+
+        synchronized (misraLock) {
+            if (m == receivedNbPing) {
+                // PONG was lost! Regenerate it.
+                Logger.log(
+                        "Misra: PONG LOST detected (m=" + m + " == nbPing=" + receivedNbPing + "). Regenerating PONG.");
+                nbPing = modulo(receivedNbPing + 1);
+                nbPong = -nbPing;
+                hasPong = true;
+
+                // Also regenerate the mutex token (the main token may have been lost with the
+                // node)
+                mutex.regenerateToken();
+                Logger.log("Regenerated mutex TOKEN due to PONG loss.");
+            } else {
+                m = receivedNbPing;
+            }
+
+            nbPing = receivedNbPing;
+            hasPing = true;
+            Logger.log("Received PING(" + receivedNbPing + "), m=" + m);
+        }
+    }
+
+    /**
+     * Handle receiving PONG token.
+     * Implements Misra detection: if m == nbPong, PING was lost.
+     */
+    private void handlePongAlg(Message message) {
+        if (!(message.payload() instanceof MisraToken(int receivedNbPong)))
+            return;
+
+        synchronized (misraLock) {
+            if (m == receivedNbPong) {
+                // PING was lost! Regenerate it.
+                Logger.log(
+                        "Misra: PING LOST detected (m=" + m + " == nbPong=" + receivedNbPong + "). Regenerating PING.");
+                nbPong = modulo(receivedNbPong - 1);
+                nbPing = -nbPong;
+                hasPing = true;
+
+                // Also regenerate the mutex token
+                mutex.regenerateToken();
+                Logger.log("Regenerated mutex TOKEN due to PING loss.");
+            } else {
+                m = receivedNbPong;
+            }
+
+            nbPong = receivedNbPong;
+            hasPong = true;
+            Logger.log("Received PONG(" + receivedNbPong + "), m=" + m);
+        }
+    }
+
+    /**
+     * Modulo operation for counter wrap-around.
+     */
+    private int modulo(int value) {
+        return ((value % MODULO_P) + MODULO_P) % MODULO_P;
     }
 
     /**
@@ -224,7 +317,6 @@ public class Node implements MessageHandler {
     public void revive() {
         if (isKilled) {
             isKilled = false;
-            lastTokenSeenTime = System.currentTimeMillis();
             try {
                 socketServer.start();
                 Logger.log("NODE REVIVED. Communication restored.");
@@ -288,6 +380,8 @@ public class Node implements MessageHandler {
 
     /**
      * Handle failure of the next neighbor by using nextNextNode.
+     * Ring repair only - token regeneration is handled by Misra Ping-Pong
+     * algorithm.
      */
     private void handleNeighborFailure(NodeInfo failedNode) {
         NodeInfo nextNext = topology.getNextNextNode();
@@ -297,38 +391,116 @@ public class Node implements MessageHandler {
             Logger.log("No backup next available. I am now alone in the ring.");
             topology.setNextNode(myself);
             topology.setNextNextNode(myself);
+            topology.setPrevNode(myself);
+            topology.setPrevPrevNode(myself);
+            // Reinitialize Misra as leader (we're alone, need to hold both PING and PONG)
+            initializeMisraAsLeader();
+            // Regenerate mutex token only when truly alone
             mutex.regenerateToken();
             return;
         }
 
-        // Verify nextNext is alive
-        Message ping = new Message(Message.Type.PING, myself, nextNext, null, logicalClock.incrementAndGet());
-        if (socketClient.sendMessage(nextNext, ping)) {
-            // nextNext is alive, use it as our new next
-            topology.setNextNode(nextNext);
-            topology.setNextNextNode(myself); // Will be updated by nextNext
-            Logger.log("Ring REPAIRED. New next: " + nextNext);
+        // Use nextNext as our new next (skip the failed node)
+        topology.setNextNode(nextNext);
+        topology.setNextNextNode(myself); // Will be updated by nextNext's response
+        Logger.log("Ring REPAIRED. New next: " + nextNext + " (failed: " + failedNode + ")");
 
-            // Tell nextNext that we are now its prev, and ask for its nextNode as our new
-            // nextNext
-            // Also tell nextNext to update its prevPrev
-            Message updateMsg = new Message(Message.Type.UPDATE_NEIGHBORS, myself, nextNext,
-                    new NeighborUpdate(null, null, myself, topology.getPrevNode()),
+        // Tell nextNext that we are now its prev, and update its prevPrev
+        // nextNext will respond with its next (our new nextNext)
+        Message updateMsg = new Message(Message.Type.UPDATE_NEIGHBORS, myself, nextNext,
+                new NeighborUpdate(null, null, myself, topology.getPrevNode()),
+                logicalClock.incrementAndGet());
+        socketClient.sendMessage(nextNext, updateMsg);
+
+        // Also notify our prev that their nextNext is now nextNext (not the failed
+        // node)
+        NodeInfo myPrev = topology.getPrevNode();
+        if (!myPrev.equals(myself)) {
+            Message updatePrev = new Message(Message.Type.UPDATE_NEIGHBORS, myself, myPrev,
+                    new NeighborUpdate(null, nextNext, null, null),
                     logicalClock.incrementAndGet());
-            socketClient.sendMessage(nextNext, updateMsg);
+            socketClient.sendMessage(myPrev, updatePrev);
+        }
 
-            // Regenerate token (the failed node may have had it)
-            Logger.log("Regenerating token to ensure ring has exactly one token...");
-            mutex.regenerateToken();
-        } else {
-            // nextNext is also dead, we're alone
-            Logger.log("nextNext " + nextNext + " is also unreachable. I am alone.");
+        // The failed node may have been holding tokens (PING, PONG, or mutex TOKEN)
+        // Regenerate them to ensure circulation continues
+        synchronized (misraLock) {
+            if (!hasPing) {
+                nbPing = modulo(nbPing + 1);
+                hasPing = true;
+                Logger.log("Regenerated PING after neighbor failure. nbPing=" + nbPing);
+            }
+            if (!hasPong) {
+                nbPong = -nbPing;
+                hasPong = true;
+                Logger.log("Regenerated PONG after neighbor failure. nbPong=" + nbPong);
+            }
+        }
+        // Regenerate mutex token to ensure ring has exactly one token
+        mutex.regenerateToken();
+        Logger.log("Regenerated mutex TOKEN after neighbor failure.");
+    }
+
+    /**
+     * Handle failure of the prev neighbor by using prevPrevNode.
+     * Ring repair only - token regeneration is handled by Misra Ping-Pong
+     * algorithm.
+     */
+    private void handlePrevNeighborFailure(NodeInfo failedNode) {
+        NodeInfo prevPrev = topology.getPrevPrevNode();
+
+        if (prevPrev.equals(myself) || prevPrev.equals(failedNode)) {
+            // No backup available, we're alone now
+            Logger.log("No backup prev available. I am now alone in the ring.");
             topology.setNextNode(myself);
             topology.setNextNextNode(myself);
             topology.setPrevNode(myself);
             topology.setPrevPrevNode(myself);
+            // Reinitialize Misra as leader (we're alone)
+            initializeMisraAsLeader();
             mutex.regenerateToken();
+            return;
         }
+
+        // Use prevPrev as our new prev (skip the failed node)
+        topology.setPrevNode(prevPrev);
+        topology.setPrevPrevNode(myself); // Will be updated by prevPrev's response
+        Logger.log("Ring REPAIRED (prev). New prev: " + prevPrev + " (failed: " + failedNode + ")");
+
+        // Tell prevPrev that we are now its next, and update its nextNext
+        // prevPrev will respond with its prev (our new prevPrev)
+        Message updateMsg = new Message(Message.Type.UPDATE_NEIGHBORS, myself, prevPrev,
+                new NeighborUpdate(myself, topology.getNextNode(), null, null),
+                logicalClock.incrementAndGet());
+        socketClient.sendMessage(prevPrev, updateMsg);
+
+        // Also notify our next that their prevPrev is now prevPrev (not the failed
+        // node)
+        NodeInfo myNext = topology.getNextNode();
+        if (!myNext.equals(myself)) {
+            Message updateNext = new Message(Message.Type.UPDATE_NEIGHBORS, myself, myNext,
+                    new NeighborUpdate(null, null, null, prevPrev),
+                    logicalClock.incrementAndGet());
+            socketClient.sendMessage(myNext, updateNext);
+        }
+
+        // The failed node may have been holding tokens (PING, PONG, or mutex TOKEN)
+        // Regenerate them to ensure circulation continues
+        synchronized (misraLock) {
+            if (!hasPing) {
+                nbPing = modulo(nbPing + 1);
+                hasPing = true;
+                Logger.log("Regenerated PING after prev neighbor failure. nbPing=" + nbPing);
+            }
+            if (!hasPong) {
+                nbPong = -nbPing;
+                hasPong = true;
+                Logger.log("Regenerated PONG after prev neighbor failure. nbPong=" + nbPong);
+            }
+        }
+        // Regenerate mutex token to ensure ring has exactly one token
+        mutex.regenerateToken();
+        Logger.log("Regenerated mutex TOKEN after prev neighbor failure.");
     }
 
     @Override
@@ -365,8 +537,10 @@ public class Node implements MessageHandler {
                 handleNeighborUpdate(message);
                 break;
             case PING:
-                // Heartbeat check - just acknowledge we're alive (no response needed for now)
-                // The sender uses successful TCP connection as proof of liveness
+                handlePingAlg(message);
+                break;
+            case PONG:
+                handlePongAlg(message);
                 break;
             default:
                 Logger.log("Unknown message type: " + message.type());
@@ -374,20 +548,20 @@ public class Node implements MessageHandler {
     }
 
     private void handleNeighborUpdate(Message message) {
-        if (message.payload() instanceof NeighborUpdate update) {
-            NodeInfo newPrev = update.prev();
+        if (message
+                .payload() instanceof NeighborUpdate(NodeInfo next, NodeInfo nextNext, NodeInfo newPrev, NodeInfo prevPrev)) {
 
-            if (update.next() != null) {
-                topology.setNextNode(update.next());
+            if (next != null) {
+                topology.setNextNode(next);
             }
-            if (update.nextNext() != null) {
-                topology.setNextNextNode(update.nextNext());
+            if (nextNext != null) {
+                topology.setNextNextNode(nextNext);
             }
             if (newPrev != null) {
                 topology.setPrevNode(newPrev);
             }
-            if (update.prevPrev() != null) {
-                topology.setPrevPrevNode(update.prevPrev());
+            if (prevPrev != null) {
+                topology.setPrevPrevNode(prevPrev);
             }
 
             // If our prev was updated (a new node joined between our old prev and us),
@@ -398,11 +572,30 @@ public class Node implements MessageHandler {
                         new NeighborUpdate(null, myNext, null, null),
                         logicalClock.incrementAndGet());
                 socketClient.sendMessage(newPrev, response);
+
+                // Also tell our next that their prevPrev is now newPrev
+                // Before: ... -> oldPrev -> Me -> Next -> ...
+                // After: ... -> newPrev -> Me -> Next -> ...
+                // So Next's prevPrev changes from oldPrev to newPrev
+                if (!myNext.equals(myself)) {
+                    Message updateNext = new Message(Message.Type.UPDATE_NEIGHBORS, myself, myNext,
+                            new NeighborUpdate(null, null, null, newPrev),
+                            logicalClock.incrementAndGet());
+                    socketClient.sendMessage(myNext, updateNext);
+                }
+            }
+
+            // If our next was updated (ring repair in prev direction),
+            // send our prev to the new next so it knows its prevPrev
+            if (next != null && !next.equals(myself)) {
+                NodeInfo myPrev = topology.getPrevNode();
+                Message response = new Message(Message.Type.UPDATE_NEIGHBORS, myself, next,
+                        new NeighborUpdate(null, null, null, myPrev),
+                        logicalClock.incrementAndGet());
+                socketClient.sendMessage(next, response);
             }
 
             Logger.log("Neighbors updated from " + message.sender());
-            // Reset timeout - topology is changing, give system time to stabilize
-            lastTokenSeenTime = System.currentTimeMillis();
         }
     }
 
@@ -415,11 +608,13 @@ public class Node implements MessageHandler {
 
     private void handleJoin(Message message) {
         // S wants to join Me.
-        // Ring: ... -> Me -> OldNext -> OldNext.Next -> ...
-        // After: ... -> Me -> S -> OldNext -> OldNext.Next -> ...
+        // Ring: ... -> Prev -> Me -> OldNext -> ...
+        // After: ... -> Prev -> Me -> S -> OldNext -> ...
+        // Prev's nextNext must change from OldNext to S!
 
         NodeInfo newNode = message.sender();
         NodeInfo oldNext = topology.getNextNode();
+        NodeInfo myPrev = topology.getPrevNode();
 
         // My new Next is S, my new NextNext is oldNext
         topology.setNextNode(newNode);
@@ -438,22 +633,31 @@ public class Node implements MessageHandler {
             topology.setPrevPrevNode(newNode);
         } else {
             newNodeNext = oldNext;
-            // We don't know oldNext's next yet, oldNext will tell us via UPDATE_NEIGHBORS
-            // response
-            newNodeNextNext = myself; // Placeholder, will be updated by oldNext's response
+            // oldNext will send the correct nextNext value to newNode via
+            // handleNeighborUpdate response
+            // We set null here to avoid race condition (our message might arrive after
+            // oldNext's response)
+            newNodeNextNext = null;
+
+            // Tell myPrev that their nextNext is now S (the new node)
+            // This is crucial: Prev -> Me -> S, so Prev's nextNext should be S
+            if (!myPrev.equals(myself)) {
+                Message updatePrev = new Message(Message.Type.UPDATE_NEIGHBORS, myself, myPrev,
+                        new NeighborUpdate(null, newNode, null, null), logicalClock.incrementAndGet());
+                socketClient.sendMessage(myPrev, updatePrev);
+            }
 
             // Tell oldNext that their new prev is S (the joining node)
-            // And their new prevPrev is me
-            // oldNext will respond with its next (which becomes S's nextNext)
+            // oldNext will respond to S with its next (S's nextNext)
             Message updateOldNext = new Message(Message.Type.UPDATE_NEIGHBORS, myself, oldNext,
                     new NeighborUpdate(null, null, newNode, myself), logicalClock.incrementAndGet());
             socketClient.sendMessage(oldNext, updateOldNext);
         }
 
         // Send UPDATE_NEIGHBORS to S with its neighbor info
-        // Note: nextNextNode will be updated by oldNext's response forwarded to S
+        // Note: nextNext may be null here, will be filled by oldNext's response
         Message resp = new Message(Message.Type.UPDATE_NEIGHBORS, myself, newNode,
-                new NeighborUpdate(newNodeNext, newNodeNextNext, myself, topology.getPrevNode()),
+                new NeighborUpdate(newNodeNext, newNodeNextNext, myself, myPrev),
                 logicalClock.incrementAndGet());
         socketClient.sendMessage(newNode, resp);
 
@@ -462,8 +666,6 @@ public class Node implements MessageHandler {
 
     private void handleLeave(Message message) {
         // L leaves gracefully.
-        // Payload contains L's next node (who should become our new next if L was our
-        // next)
         if (message.payload() instanceof NeighborUpdate update) {
             if (topology.getNextNode().equals(message.sender())) {
                 if (update.next() != null) {
@@ -522,15 +724,20 @@ public class Node implements MessageHandler {
 
     public String getStatus() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Node: ").append(myself).append("\n");
+        sb.append("PrevPrev: ").append(topology.getPrevPrevNode()).append("\n");
+        sb.append("Prev: ").append(topology.getPrevNode()).append("\n");
+        sb.append("This Node: ").append(myself).append("\n");
         sb.append("Next: ").append(topology.getNextNode()).append("\n");
         sb.append("NextNext: ").append(topology.getNextNextNode()).append("\n");
-        sb.append("Prev: ").append(topology.getPrevNode()).append("\n");
-        sb.append("PrevPrev: ").append(topology.getPrevPrevNode()).append("\n");
         sb.append("Token: ").append(mutex.hasToken()).append("\n");
         sb.append("LC: ").append(logicalClock.getTime()).append("\n");
         sb.append("Killed: ").append(isKilled).append("\n");
         sb.append("InCS: ").append(inCriticalSection).append("\n");
+        synchronized (misraLock) {
+            sb.append("Misra: m=").append(m)
+                    .append(", hasPing=").append(hasPing).append("(").append(nbPing).append(")")
+                    .append(", hasPong=").append(hasPong).append("(").append(nbPong).append(")\n");
+        }
         sb.append("Chat History:\n");
         for (ChatMessage msg : chatManager.getHistory()) {
             sb.append("  ").append(msg).append("\n");

@@ -4,14 +4,6 @@ import cz.cvut.fel.dsva.core.NodeInfo;
 import cz.cvut.fel.dsva.utils.Logger;
 import lombok.Getter;
 
-/**
- * Ring topology where each node only knows its immediate neighbors:
- * - myself: this node
- * - prevNode: the node before me in the ring
- * - prevPrevNode: the node before prevNode (backup for prev failure)
- * - nextNode: the node after me in the ring
- * - nextNextNode: the node after nextNode (backup for next failure)
- */
 @Getter
 public class RingTopology {
     private final NodeInfo myself;
@@ -40,7 +32,7 @@ public class RingTopology {
 
     public synchronized void setPrevNode(NodeInfo prev) {
         this.prevNode = prev;
-        Logger.log("Topology update: Previous neighbor is now " + prev);
+        Logger.log("Topology update: Prev neighbor is now " + prev);
     }
 
     public synchronized void setPrevPrevNode(NodeInfo prevPrev) {
@@ -52,10 +44,6 @@ public class RingTopology {
         return nextNode.equals(myself);
     }
 
-    /**
-     * When the next node fails, promote nextNextNode to be the new next.
-     * Returns the failed node's nextNext which should become our new nextNextNode.
-     */
     public synchronized NodeInfo promoteNextNext() {
         NodeInfo failedNode = nextNode;
         this.nextNode = nextNextNode;
@@ -64,9 +52,6 @@ public class RingTopology {
         return failedNode;
     }
 
-    /**
-     * When the prev node fails, promote prevPrevNode to be the new prev.
-     */
     public synchronized void promotePrevPrev() {
         NodeInfo failedNode = prevNode;
         this.prevNode = prevPrevNode;
@@ -85,4 +70,3 @@ public class RingTopology {
                 '}';
     }
 }
-        // 

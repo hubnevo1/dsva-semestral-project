@@ -10,8 +10,9 @@ public record Message(Type type, NodeInfo sender, NodeInfo target, Object payloa
         LEAVE, // Graceful exit
         TOKEN, // Passing the mutex token
         CHAT, // Chat message
-        PING, // Heartbeat / check alive
-        UPDATE_NEIGHBORS // Update next/prev/nextNext/prevPrev pointers
+        UPDATE_NEIGHBORS, // Update next/prev/nextNext/prevPrev pointers
+        PING, // Travels in Next direction
+        PONG // Travels in Prev direction
     }
 
     // Target is optional, can be null for broadcast/ring-pass
