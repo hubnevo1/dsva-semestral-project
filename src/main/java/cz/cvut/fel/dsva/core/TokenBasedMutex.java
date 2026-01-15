@@ -1,8 +1,6 @@
 package cz.cvut.fel.dsva.core;
 
 import cz.cvut.fel.dsva.utils.Logger;
-import lombok.Getter;
-
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -48,17 +46,6 @@ public class TokenBasedMutex {
         }
     }
 
-    public void waitForToken() throws InterruptedException {
-        lock.lock();
-        try {
-            while (!hasToken) {
-                tokenReceived.await();
-            }
-        } finally {
-            lock.unlock();
-        }
-    }
-
     public boolean hasToken() {
         lock.lock();
         try {
@@ -68,7 +55,7 @@ public class TokenBasedMutex {
         }
     }
 
-    public Token regenerateToken() {
+    public void regenerateToken() {
         lock.lock();
         try {
             Token newToken = new Token(lastSeenGenerationId);
@@ -77,7 +64,6 @@ public class TokenBasedMutex {
             this.lastSeenGenerationId = newToken.getGenerationId();
             Logger.log("Token REGENERATED: " + newToken);
             tokenReceived.signalAll();
-            return newToken;
         } finally {
             lock.unlock();
         }

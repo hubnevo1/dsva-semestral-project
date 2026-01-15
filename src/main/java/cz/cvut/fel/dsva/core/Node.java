@@ -29,9 +29,9 @@ public class Node implements MessageHandler {
     private volatile boolean inCriticalSection = false; // If true, hold token
     private volatile boolean wantCriticalSection = false; // API request to enter CS
 
-    private volatile int m = 0; // Last seen counter from PING or PONG
-    private volatile int nbPing = 0; // PING counter (positive)
-    private volatile int nbPong = 0; // PONG counter (negative)
+    private int m = 0; // Last seen counter from PING or PONG
+    private int nbPing = 0; // PING counter
+    private int nbPong = 0; // PONG counter
     private volatile boolean hasPing = false;
     private volatile boolean hasPong = false;
     private final Object misraLock = new Object();
@@ -529,7 +529,8 @@ public class Node implements MessageHandler {
     }
 
     private void handleNeighborUpdate(Message message) {
-        if (message.payload() instanceof NeighborUpdate(NodeInfo newNext, NodeInfo newNextNext, NodeInfo newPrev, NodeInfo newPrevPrev)) {
+        if (message
+                .payload() instanceof NeighborUpdate(NodeInfo newNext, NodeInfo newNextNext, NodeInfo newPrev, NodeInfo newPrevPrev)) {
 
             if (newNext != null) {
                 topology.setNextNode(newNext);
