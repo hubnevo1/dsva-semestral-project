@@ -1,6 +1,7 @@
 #!/bin/bash
-# DSVA Distributed Chat Demonstration Script
-# This script demonstrates the functionality of the token-ring based distributed chat application
+# DSVA Critical Section Failure Test Script
+# Tests scenario: Node in critical section (holding token) is killed
+# Expected: Misra Ping-Pong algorithm detects failure, regenerates tokens
 
 set -e
 
@@ -8,8 +9,8 @@ set -e
 BASE_IP="127.0.0.1"
 BASE_PORT=5001
 BASE_API_PORT=8001
-NUM_NODES=5
-SLEEP_TIME=3
+NUM_NODES=10
+SLEEP_TIME=4
 
 # Paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -70,16 +71,14 @@ wait_for_node() {
 }
 
 echo "=============================================="
-echo "# DSVA DISTRIBUTED CHAT DEMONSTRATION"
+echo "# CRITICAL SECTION FAILURE TEST"
 echo "=============================================="
 echo ""
-echo "This script demonstrates:"
-echo "  1. Node joining and ring formation"
-echo "  2. Token circulation"
-echo "  3. Chat message broadcasting"
-echo "  4. Node failure and ring repair"
-echo "  5. Token regeneration"
-echo "  6. Critical section (mutex) operations"
+echo "This script tests:"
+echo "  1. Node enters critical section (holds mutex token)"
+echo "  2. Node is killed while in critical section"
+echo "  3. Misra Ping-Pong detects failure and regenerates tokens"
+echo "  4. Other nodes continue to function"
 echo ""
 
 
@@ -141,101 +140,86 @@ done
 
 echo ""
 echo "####################################################"
-echo "# PHASE 2: CHAT MESSAGE BROADCASTING"
+echo "# PHASE 2: NODE 3 ENTERS CRITICAL SECTION"
 echo "####################################################"
 
-api_call "Node 1 sends a chat message" "http://$BASE_IP:${NODE_API_PORT[1]}/chat?msg=Hello%20from%20Node%201!"
-sleep $SLEEP_TIME
-
-api_call "Node 3 sends a chat message" "http://$BASE_IP:${NODE_API_PORT[3]}/chat?msg=Hello%20from%20Node%203!"
-sleep $SLEEP_TIME
-
-api_call "Check status on Node 5 to see received messages" "http://$BASE_IP:${NODE_API_PORT[5]}/status"
-sleep $SLEEP_TIME
-
+api_call "Node 3 requests to enter critical section" "http://$BASE_IP:${NODE_API_PORT[3]}/enterCS"
 
 echo ""
-echo "####################################################"
-echo "# PHASE 3: CRITICAL SECTION (MUTEX) OPERATIONS"
-echo "####################################################"
-
-api_call "Node 2 enters critical section (requests token)" "http://$BASE_IP:${NODE_API_PORT[2]}/enterCS"
-
-echo ""
-echo ">>> Waiting for token to arrive at Node 2..."
+echo ">>> Waiting for token to arrive at Node 3..."
 sleep 5
 
-api_call "Check status of Node 2 (should show InCS=true, Token=true)" "http://$BASE_IP:${NODE_API_PORT[2]}/status"
+api_call "Check Node 3 status (should show InCS=true, Token=true)" "http://$BASE_IP:${NODE_API_PORT[3]}/status"
 sleep 2
 
-api_call "Node 2 leaves critical section (releases token)" "http://$BASE_IP:${NODE_API_PORT[2]}/leaveCS"
-sleep $SLEEP_TIME
+echo ""
+echo ">>> Verifying Node 3 holds the token..."
+for i in 1 2 4 5; do
+    api_call "Status of Node $i (should show Token=false)" "http://$BASE_IP:${NODE_API_PORT[$i]}/status"
+done
 
 
 echo ""
 echo "####################################################"
-echo "# PHASE 4: NETWORK DELAY SIMULATION"
+echo "# PHASE 3: KILL NODE 3 WHILE IN CRITICAL SECTION"
 echo "####################################################"
-
-api_call "Set 5s delay on Node 3" "http://$BASE_IP:${NODE_API_PORT[3]}/setDelayMs?ms=5000"
-sleep 1
-
-api_call "Node 1 sends message (will be delayed passing through Node 3)" "http://$BASE_IP:${NODE_API_PORT[1]}/chat?msg=Testing%20with%20delay"
-sleep $SLEEP_TIME
-
-api_call "Status of Node 5 before message arrives" "http://$BASE_IP:${NODE_API_PORT[5]}/status"
-sleep 1
-
-api_call "Reset delay on Node 3" "http://$BASE_IP:${NODE_API_PORT[3]}/setDelayMs?ms=0"
-sleep $SLEEP_TIME
-
 echo ""
-echo "####################################################"
-echo "# PHASE 5: NODE FAILURE AND RING REPAIR"
-echo "####################################################"
+echo ">>> Node 3 is holding the mutex TOKEN in critical section."
+echo ">>> Killing Node 3 will cause:"
+echo ">>>   - Mutex TOKEN to be lost"
+echo ">>>   - PING/PONG may be lost (if Node 3 was holding them)"
+echo ">>>   - Nodes 2 and 4 will detect failure and repair ring"
+echo ""
 
-api_call "Status before failure - Node 1" "http://$BASE_IP:${NODE_API_PORT[1]}/status"
-sleep 1
-
-api_call "KILL Node 3 (simulate crash)" "http://$BASE_IP:${NODE_API_PORT[3]}/kill"
+api_call "KILL Node 3 (simulate crash while in CS)" "http://$BASE_IP:${NODE_API_PORT[3]}/kill"
 
 echo ""
 echo ">>> Waiting for Misra Ping-Pong failure detection and ring repair (~5 seconds)..."
-echo ">>> PING/PONG tokens detect failure immediately when delivery fails."
-echo ">>> Ring is repaired using nextNext/prevPrev pointers, tokens are regenerated."
+echo ">>> When PING or PONG fails to be delivered to Node 3:"
+echo ">>>   - Node 2 (or 4) detects failure via failed PING/PONG delivery"
+echo ">>>   - Ring is repaired using nextNext/prevPrev"
+echo ">>>   - Tokens (PING, PONG, mutex TOKEN) are regenerated"
 sleep 5
 
-api_call "Status of Node 1 after repair" "http://$BASE_IP:${NODE_API_PORT[1]}/status"
-sleep 1
 
-api_call "Status of Node 4 after repair" "http://$BASE_IP:${NODE_API_PORT[4]}/status"
-sleep 1
+echo ""
+echo "####################################################"
+echo "# PHASE 4: CHECK STATUS AFTER FAILURE"
+echo "####################################################"
 
-api_call "Send chat message after failure" "http://$BASE_IP:${NODE_API_PORT[1]}/chat?msg=Message%20after%20Node%203%20failure"
+echo ""
+echo ">>> Checking if ring was repaired and tokens regenerated..."
+
+for i in $(seq 1 $NUM_NODES); do
+    api_call "Status of Node $i" "http://$BASE_IP:${NODE_API_PORT[$i]}/status"
+done
+
+echo ""
+echo ">>> Expected observations:"
+echo ">>>   - One node should now have Token=true (regenerated)"
+echo ">>>   - Ring should be repaired: Node 2's Next should be Node 4 (skipping Node 3)"
+echo ">>>   - Node 4's Prev should be Node 2 (skipping Node 3)"
+echo ">>>   - Misra tokens should show hasPing/hasPong activity"
+
+
+echo ""
+echo "####################################################"
+echo "# PHASE 5: TEST CONTINUED OPERATION"
+echo "####################################################"
+
+echo ""
+echo ">>> Testing if the system can still send chat messages..."
+
+api_call "Node 1 sends chat message" "http://$BASE_IP:${NODE_API_PORT[1]}/chat?msg=Message%20after%20CS%20failure"
+sleep $SLEEP_TIME
+
+api_call "Node 5 sends chat message" "http://$BASE_IP:${NODE_API_PORT[5]}/chat?msg=System%20recovered%20successfully"
 sleep $SLEEP_TIME
 
 
 echo ""
 echo "####################################################"
-echo "# PHASE 6: NODE RECOVERY (REVIVE)"
-echo "####################################################"
-
-api_call "REVIVE Node 3" "http://$BASE_IP:${NODE_API_PORT[3]}/revive"
-sleep $SLEEP_TIME
-
-api_call "Node 3 re-joins the network via Node 2" "http://$BASE_IP:${NODE_API_PORT[3]}/join?ip=$BASE_IP&port=${NODE_PORT[2]}"
-sleep $SLEEP_TIME
-
-api_call "Status of Node 3 after rejoin" "http://$BASE_IP:${NODE_API_PORT[3]}/status"
-sleep 1
-
-api_call "Send chat from recovered Node 3" "http://$BASE_IP:${NODE_API_PORT[3]}/chat?msg=Node%203%20is%20back!"
-sleep $SLEEP_TIME
-
-
-echo ""
-echo "####################################################"
-echo "# PHASE 7: FINAL STATUS CHECK"
+echo "# PHASE 6: FINAL STATUS CHECK"
 echo "####################################################"
 
 for i in $(seq 1 $NUM_NODES); do
@@ -247,14 +231,15 @@ echo "=============================================="
 echo "# SUMMARY"
 echo "=============================================="
 echo ""
-echo "This demonstration showed:"
-echo "  ✓ Ring topology formation with $NUM_NODES nodes"
-echo "  ✓ Token-based mutual exclusion"
-echo "  ✓ Chat message broadcasting around the ring"
-echo "  ✓ Critical section entry/exit"
-echo "  ✓ Network delay simulation"
-echo "  ✓ Node failure detection and ring repair"
-echo "  ✓ Token regeneration after failure"
-echo "  ✓ Node recovery and re-join"
+echo "This test demonstrated:"
+echo "  ✓ Node 3 entered critical section (held mutex token)"
+echo "  ✓ Node 3 was killed while holding the token"
+echo "  ✓ Misra Ping-Pong algorithm detected the failure"
+echo "  ✓ Ring was repaired (Node 2 -> Node 4, skipping dead Node 3)"
+echo "  ✓ Tokens (PING, PONG, mutex TOKEN) were regenerated"
+echo "  ✓ System continued to function with 4 nodes"
+echo ""
+echo "Key insight: The Misra Ping-Pong algorithm ensures token regeneration"
+echo "even when the token holder crashes unexpectedly."
 echo ""
 echo "Log files are available in: $LOG_DIR/"

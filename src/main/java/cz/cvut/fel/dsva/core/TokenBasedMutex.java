@@ -20,7 +20,8 @@ public class TokenBasedMutex {
         try {
             // Check if this token is newer than what we've seen
             if (token.getGenerationId() < lastSeenGenerationId) {
-                Logger.log("Discarding old token (gen=" + token.getGenerationId() + "), current gen=" + lastSeenGenerationId);
+                Logger.log("Discarding old token (gen=" + token.getGenerationId() + "), current gen="
+                        + lastSeenGenerationId);
                 return;
             }
 
@@ -72,7 +73,7 @@ public class TokenBasedMutex {
     public Token regenerateToken() {
         lock.lock();
         try {
-            Token newToken = new Token();
+            Token newToken = new Token(lastSeenGenerationId);
             this.currentToken = newToken;
             this.hasToken = true;
             this.lastSeenGenerationId = newToken.getGenerationId();

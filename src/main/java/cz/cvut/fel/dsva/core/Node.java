@@ -199,7 +199,7 @@ public class Node implements MessageHandler {
             // Failed to send, reclaim and handle failure
             hasPing = true;
             Logger.log("Failed to pass PING to " + next + ". Handling failure...");
-            handleNeighborFailure(next);
+            handleNextNeighborFailure(next);
         } else {
             Logger.log("Passed PING(" + nbPing + ") to " + next);
         }
@@ -293,16 +293,10 @@ public class Node implements MessageHandler {
         }
     }
 
-    /**
-     * Modulo operation for counter wrap-around.
-     */
     private int modulo(int value) {
         return ((value % MODULO_P) + MODULO_P) % MODULO_P;
     }
 
-    /**
-     * API: Kill the node (simulated failure).
-     */
     public void kill() {
         if (!isKilled) {
             isKilled = true;
@@ -311,9 +305,6 @@ public class Node implements MessageHandler {
         }
     }
 
-    /**
-     * API: Revive the node.
-     */
     public void revive() {
         if (isKilled) {
             isKilled = false;
@@ -370,7 +361,7 @@ public class Node implements MessageHandler {
                 boolean sent = socketClient.sendMessage(next, msg);
                 if (!sent) {
                     Logger.log("Failed to pass token to " + next + ". Using nextNext as fallback...");
-                    handleNeighborFailure(next);
+                    handleNextNeighborFailure(next);
                     // After repair, reclaim token so we don't lose it
                     mutex.receiveToken(token);
                 }
@@ -378,12 +369,7 @@ public class Node implements MessageHandler {
         }
     }
 
-    /**
-     * Handle failure of the next neighbor by using nextNextNode.
-     * Ring repair only - token regeneration is handled by Misra Ping-Pong
-     * algorithm.
-     */
-    private void handleNeighborFailure(NodeInfo failedNode) {
+    private void handleNextNeighborFailure(NodeInfo failedNode) {
         NodeInfo nextNext = topology.getNextNextNode();
 
         if (nextNext.equals(myself) || nextNext.equals(failedNode)) {
@@ -441,11 +427,6 @@ public class Node implements MessageHandler {
         Logger.log("Regenerated mutex TOKEN after neighbor failure.");
     }
 
-    /**
-     * Handle failure of the prev neighbor by using prevPrevNode.
-     * Ring repair only - token regeneration is handled by Misra Ping-Pong
-     * algorithm.
-     */
     private void handlePrevNeighborFailure(NodeInfo failedNode) {
         NodeInfo prevPrev = topology.getPrevPrevNode();
 
@@ -548,24 +529,23 @@ public class Node implements MessageHandler {
     }
 
     private void handleNeighborUpdate(Message message) {
-        if (message
-                .payload() instanceof NeighborUpdate(NodeInfo next, NodeInfo nextNext, NodeInfo newPrev, NodeInfo prevPrev)) {
+        if (message.payload() instanceof NeighborUpdate(NodeInfo newNext, NodeInfo newNextNext, NodeInfo newPrev, NodeInfo newPrevPrev)) {
 
-            if (next != null) {
-                topology.setNextNode(next);
+            if (newNext != null) {
+                topology.setNextNode(newNext);
             }
-            if (nextNext != null) {
-                topology.setNextNextNode(nextNext);
+            if (newNextNext != null) {
+                topology.setNextNextNode(newNextNext);
             }
             if (newPrev != null) {
                 topology.setPrevNode(newPrev);
             }
-            if (prevPrev != null) {
-                topology.setPrevPrevNode(prevPrev);
+            if (newPrevPrev != null) {
+                topology.setPrevPrevNode(newPrevPrev);
             }
 
             // If our prev was updated (a new node joined between our old prev and us),
-            // send our next to the new prev so it knows its nextNext
+            // send our newNext to the new prev so it knows its newNextNext
             if (newPrev != null && !newPrev.equals(myself)) {
                 NodeInfo myNext = topology.getNextNode();
                 Message response = new Message(Message.Type.UPDATE_NEIGHBORS, myself, newPrev,
@@ -573,10 +553,10 @@ public class Node implements MessageHandler {
                         logicalClock.incrementAndGet());
                 socketClient.sendMessage(newPrev, response);
 
-                // Also tell our next that their prevPrev is now newPrev
+                // Also tell our newNext that their newPrevPrev is now newPrev
                 // Before: ... -> oldPrev -> Me -> Next -> ...
                 // After: ... -> newPrev -> Me -> Next -> ...
-                // So Next's prevPrev changes from oldPrev to newPrev
+                // So Next's newPrevPrev changes from oldPrev to newPrev
                 if (!myNext.equals(myself)) {
                     Message updateNext = new Message(Message.Type.UPDATE_NEIGHBORS, myself, myNext,
                             new NeighborUpdate(null, null, null, newPrev),
@@ -585,14 +565,28 @@ public class Node implements MessageHandler {
                 }
             }
 
-            // If our next was updated (ring repair in prev direction),
-            // send our prev to the new next so it knows its prevPrev
-            if (next != null && !next.equals(myself)) {
+            // If our newNext was updated (ring repair in prev direction),
+            // send our prev to the new newNext so it knows its newPrevPrev
+            // AND tell our prev that their newNextNext is now our new newNext
+            if (newNext != null && !newNext.equals(myself)) {
                 NodeInfo myPrev = topology.getPrevNode();
-                Message response = new Message(Message.Type.UPDATE_NEIGHBORS, myself, next,
+
+                // Tell new newNext about its newPrevPrev
+                Message response = new Message(Message.Type.UPDATE_NEIGHBORS, myself, newNext,
                         new NeighborUpdate(null, null, null, myPrev),
                         logicalClock.incrementAndGet());
-                socketClient.sendMessage(next, response);
+                socketClient.sendMessage(newNext, response);
+
+                // Tell our prev that their newNextNext is now our new newNext
+                // Before: ... -> Prev -> Me -> [failed] -> newNext -> ...
+                // After: ... -> Prev -> Me -> newNext -> ...
+                // So Prev's newNextNext should be 'newNext' (skipping the failed node)
+                if (!myPrev.equals(myself)) {
+                    Message updatePrev = new Message(Message.Type.UPDATE_NEIGHBORS, myself, myPrev,
+                            new NeighborUpdate(null, newNext, null, null),
+                            logicalClock.incrementAndGet());
+                    socketClient.sendMessage(myPrev, updatePrev);
+                }
             }
 
             Logger.log("Neighbors updated from " + message.sender());

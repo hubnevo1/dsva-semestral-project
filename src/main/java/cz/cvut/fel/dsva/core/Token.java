@@ -17,8 +17,16 @@ public class Token implements Serializable {
     @Getter
     private final String hash;
 
-    public Token() {
-        this.generationId = generationCounter.incrementAndGet();
+    public Token(long minGenerationId) {
+        long newId;
+        long current;
+
+        do {
+            current = generationCounter.get();
+            newId = Math.max(current + 1, minGenerationId + 1);
+        } while (!generationCounter.compareAndSet(current, newId));
+
+        this.generationId = newId;
         this.hash = UUID.randomUUID().toString();
     }
 
