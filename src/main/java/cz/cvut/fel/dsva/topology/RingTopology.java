@@ -4,23 +4,28 @@ import cz.cvut.fel.dsva.core.NodeInfo;
 import cz.cvut.fel.dsva.utils.Logger;
 import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
+/**
+ * Ring topology where each node only knows its immediate neighbors:
+ * - myself: this node
+ * - prevNode: the node before me in the ring
+ * - prevPrevNode: the node before prevNode (backup for prev failure)
+ * - nextNode: the node after me in the ring
+ * - nextNextNode: the node after nextNode (backup for next failure)
+ */
 @Getter
 public class RingTopology {
     private final NodeInfo myself;
     private NodeInfo nextNode;
+    private NodeInfo nextNextNode;
     private NodeInfo prevNode;
-
-    private final List<NodeInfo> allNodes = new CopyOnWriteArrayList<>();
+    private NodeInfo prevPrevNode;
 
     public RingTopology(NodeInfo myself) {
         this.myself = myself;
         this.nextNode = myself;
+        this.nextNextNode = myself;
         this.prevNode = myself;
-        this.allNodes.add(myself);
+        this.prevPrevNode = myself;
     }
 
     public synchronized void setNextNode(NodeInfo next) {
@@ -28,93 +33,56 @@ public class RingTopology {
         Logger.log("Topology update: Next neighbor is now " + next);
     }
 
+    public synchronized void setNextNextNode(NodeInfo nextNext) {
+        this.nextNextNode = nextNext;
+        Logger.log("Topology update: NextNext neighbor is now " + nextNext);
+    }
+
     public synchronized void setPrevNode(NodeInfo prev) {
         this.prevNode = prev;
         Logger.log("Topology update: Previous neighbor is now " + prev);
+    }
+
+    public synchronized void setPrevPrevNode(NodeInfo prevPrev) {
+        this.prevPrevNode = prevPrev;
+        Logger.log("Topology update: PrevPrev neighbor is now " + prevPrev);
     }
 
     public boolean isAlone() {
         return nextNode.equals(myself);
     }
 
-    public void addNode(NodeInfo node) {
-        if (!allNodes.contains(node)) {
-            allNodes.add(node);
-            Logger.log("Topology table: Added node " + node + ". Total nodes: " + allNodes.size());
-        }
+    /**
+     * When the next node fails, promote nextNextNode to be the new next.
+     * Returns the failed node's nextNext which should become our new nextNextNode.
+     */
+    public synchronized NodeInfo promoteNextNext() {
+        NodeInfo failedNode = nextNode;
+        this.nextNode = nextNextNode;
+        this.nextNextNode = myself; // Will be updated by the new next node
+        Logger.log("Promoted nextNext to next. New next: " + nextNode + " (failed: " + failedNode + ")");
+        return failedNode;
     }
 
-    public void removeNode(NodeInfo node) {
-        allNodes.remove(node);
-        Logger.log("Topology table: Removed node " + node + ". Total nodes: " + allNodes.size());
+    /**
+     * When the prev node fails, promote prevPrevNode to be the new prev.
+     */
+    public synchronized void promotePrevPrev() {
+        NodeInfo failedNode = prevNode;
+        this.prevNode = prevPrevNode;
+        this.prevPrevNode = myself; // Will be updated by the new prev node
+        Logger.log("Promoted prevPrev to prev. New prev: " + prevNode + " (failed: " + failedNode + ")");
     }
 
-    public List<NodeInfo> getAllNodes() {
-        return new ArrayList<>(allNodes);
-    }
-
-    public void updateAllNodes(List<NodeInfo> nodes) {
-        int sizeBefore = allNodes.size();
-
-        // Remove nodes that are not in the received list (they were removed)
-        boolean removed = allNodes.removeIf(node -> !nodes.contains(node) && !node.equals(myself));
-
-        // Add nodes that are in received list but not in ours
-        boolean added = false;
-        for (NodeInfo node : nodes) {
-            if (!allNodes.contains(node)) {
-                allNodes.add(node);
-                added = true;
-            }
-        }
-
-        // Only log if there was an actual change
-        if (removed || added) {
-            Logger.log("Topology table updated: " + sizeBefore + " -> " + allNodes.size() + " nodes.");
-        }
-    }
-
-    public List<NodeInfo> getCandidatesAfter(NodeInfo failedNode) {
-        List<NodeInfo> candidates = new ArrayList<>();
-
-        // Find index of failed node
-        int failedIndex = -1;
-        for (int i = 0; i < allNodes.size(); i++) {
-            if (allNodes.get(i).equals(failedNode)) {
-                failedIndex = i;
-                break;
-            }
-        }
-
-        if (failedIndex == -1) {
-            // Failed node not in list, return all except self and prevNode
-            for (NodeInfo node : allNodes) {
-                if (!node.equals(myself) && !node.equals(failedNode) && !node.equals(prevNode)) {
-                    candidates.add(node);
-                }
-            }
-            // Add prevNode last (fallback - only if all else fails)
-            if (prevNode != null && !prevNode.equals(myself) && !prevNode.equals(failedNode)) {
-                candidates.add(prevNode);
-            }
-            return candidates;
-        }
-
-        // Return nodes in ring order starting after failed node
-        int size = allNodes.size();
-        for (int i = 1; i < size; i++) {
-            int idx = (failedIndex + i) % size;
-            NodeInfo candidate = allNodes.get(idx);
-            if (!candidate.equals(myself) && !candidate.equals(failedNode) && !candidate.equals(prevNode)) {
-                candidates.add(candidate);
-            }
-        }
-
-        // Add prevNode as last resort (fallback to close the ring if no other nodes available)
-        if (prevNode != null && !prevNode.equals(myself) && !prevNode.equals(failedNode)) {
-            candidates.add(prevNode);
-        }
-
-        return candidates;
+    @Override
+    public String toString() {
+        return "RingTopology{" +
+                "myself=" + myself +
+                ", prev=" + prevNode +
+                ", prevPrev=" + prevPrevNode +
+                ", next=" + nextNode +
+                ", nextNext=" + nextNextNode +
+                '}';
     }
 }
+        // 

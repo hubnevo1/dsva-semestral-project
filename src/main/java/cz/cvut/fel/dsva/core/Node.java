@@ -136,11 +136,19 @@ public class Node implements MessageHandler {
                             consecutiveTimeouts = 0;
                         } else {
                             // Next is alive, but we're not getting tokens
-                            // If this happens multiple times, we're likely ORPHANED
+                            // If this happens multiple times, ping our prev to check if we're orphaned
                             if (consecutiveTimeouts >= 3) {
-                                Logger.log(
-                                        "Multiple timeouts while next is alive. I may be ORPHANED. Re-joining network...");
-                                attemptRejoin();
+                                Logger.log("Multiple timeouts. Checking if I'm orphaned...");
+                                NodeInfo prev = topology.getPrevNode();
+                                if (!prev.equals(myself)) {
+                                    Message pingPrev = new Message(Message.Type.PING, myself, prev, null,
+                                            logicalClock.incrementAndGet());
+                                    if (!socketClient.sendMessage(prev, pingPrev)) {
+                                        Logger.log("Prev neighbor " + prev + " is also dead! I may be isolated.");
+                                        // Try nextNext as last resort
+                                        attemptRecovery();
+                                    }
+                                }
                                 consecutiveTimeouts = 0;
                             }
                         }
@@ -155,22 +163,35 @@ public class Node implements MessageHandler {
     }
 
     /**
-     * Attempt to re-join the network when we detect we're orphaned.
+     * Attempt recovery when we detect we're possibly isolated.
      */
-    private void attemptRejoin() {
-        // Try to join any live node we know about
-        for (NodeInfo node : topology.getAllNodes()) {
-            if (node.equals(myself))
-                continue;
+    private void attemptRecovery() {
+        NodeInfo nextNext = topology.getNextNextNode();
+        if (!nextNext.equals(myself)) {
+            Message ping = new Message(Message.Type.PING, myself, nextNext, null, logicalClock.incrementAndGet());
+            if (socketClient.sendMessage(nextNext, ping)) {
+                Logger.log("Found live node via nextNext: " + nextNext + ". Re-joining...");
+                Message joinMsg = new Message(Message.Type.JOIN, myself, nextNext, null,
+                        logicalClock.incrementAndGet());
+                if (socketClient.sendMessage(nextNext, joinMsg)) {
+                    Logger.log("Re-join request sent to " + nextNext + ". Waiting for token...");
+                    lastTokenSeenTime = System.currentTimeMillis();
+                    return;
+                }
+            }
+        }
 
-            Message ping = new Message(Message.Type.PING, myself, node, null, logicalClock.incrementAndGet());
-            if (socketClient.sendMessage(node, ping)) {
-                Logger.log("Found live node " + node + ". Re-joining...");
-                // Send a JOIN request to this node
-                Message joinMsg = new Message(Message.Type.JOIN, myself, node, null, logicalClock.incrementAndGet());
-                if (socketClient.sendMessage(node, joinMsg)) {
-                    Logger.log("Re-join request sent to " + node + ". Waiting for token...");
-                    lastTokenSeenTime = System.currentTimeMillis(); // Reset timeout
+        // If we can't reach nextNext, try prevPrev
+        NodeInfo prevPrev = topology.getPrevPrevNode();
+        if (!prevPrev.equals(myself)) {
+            Message ping = new Message(Message.Type.PING, myself, prevPrev, null, logicalClock.incrementAndGet());
+            if (socketClient.sendMessage(prevPrev, ping)) {
+                Logger.log("Found live node via prevPrev: " + prevPrev + ". Re-joining...");
+                Message joinMsg = new Message(Message.Type.JOIN, myself, prevPrev, null,
+                        logicalClock.incrementAndGet());
+                if (socketClient.sendMessage(prevPrev, joinMsg)) {
+                    Logger.log("Re-join request sent to " + prevPrev + ". Waiting for token...");
+                    lastTokenSeenTime = System.currentTimeMillis();
                     return;
                 }
             }
@@ -179,6 +200,9 @@ public class Node implements MessageHandler {
         // If we can't reach anyone, we're truly alone - regenerate token
         Logger.log("Cannot reach any nodes. Generating token as lone node.");
         topology.setNextNode(myself);
+        topology.setNextNextNode(myself);
+        topology.setPrevNode(myself);
+        topology.setPrevPrevNode(myself);
         mutex.regenerateToken();
         lastTokenSeenTime = System.currentTimeMillis();
     }
@@ -253,71 +277,58 @@ public class Node implements MessageHandler {
                 Message msg = new Message(Message.Type.TOKEN, myself, next, token, logicalClock.incrementAndGet());
                 boolean sent = socketClient.sendMessage(next, msg);
                 if (!sent) {
-                    Logger.log("Failed to pass token to " + next + ". Attempting repair...");
+                    Logger.log("Failed to pass token to " + next + ". Using nextNext as fallback...");
                     handleNeighborFailure(next);
-                    // After repair, try passing again?
-                    // For now, reclaim token so we don't lose it if we are the survivor
+                    // After repair, reclaim token so we don't lose it
                     mutex.receiveToken(token);
                 }
             }
         }
     }
 
+    /**
+     * Handle failure of the next neighbor by using nextNextNode.
+     */
     private void handleNeighborFailure(NodeInfo failedNode) {
-        // Remove failed node from topology table
-        topology.removeNode(failedNode);
+        NodeInfo nextNext = topology.getNextNextNode();
 
-        // Get candidate nodes to try (in ring order after failed node)
-        java.util.List<NodeInfo> candidates = topology.getCandidatesAfter(failedNode);
-
-        NodeInfo newNext = null;
-        for (NodeInfo candidate : candidates) {
-            Logger.log("Trying candidate: " + candidate);
-
-            // Verify candidate is alive via PING
-            Message ping = new Message(Message.Type.PING, myself, candidate, null, logicalClock.incrementAndGet());
-            if (socketClient.sendMessage(candidate, ping)) {
-                newNext = candidate;
-                Logger.log("Found live node: " + candidate);
-                break;
-            } else {
-                Logger.log("Candidate " + candidate + " is also unreachable.");
-                topology.removeNode(candidate);
-            }
+        if (nextNext.equals(myself) || nextNext.equals(failedNode)) {
+            // No backup available, we're alone now
+            Logger.log("No backup next available. I am now alone in the ring.");
+            topology.setNextNode(myself);
+            topology.setNextNextNode(myself);
+            mutex.regenerateToken();
+            return;
         }
 
-        if (newNext != null) {
-            // Repair the ring
-            topology.setNextNode(newNext);
-            Logger.log("Ring REPAIRED. New next: " + newNext);
+        // Verify nextNext is alive
+        Message ping = new Message(Message.Type.PING, myself, nextNext, null, logicalClock.incrementAndGet());
+        if (socketClient.sendMessage(nextNext, ping)) {
+            // nextNext is alive, use it as our new next
+            topology.setNextNode(nextNext);
+            topology.setNextNextNode(myself); // Will be updated by nextNext
+            Logger.log("Ring REPAIRED. New next: " + nextNext);
 
-            // Broadcast updated topology to all nodes (so they know about removed node)
-            broadcastTopology();
+            // Tell nextNext that we are now its prev, and ask for its nextNode as our new
+            // nextNext
+            // Also tell nextNext to update its prevPrev
+            Message updateMsg = new Message(Message.Type.UPDATE_NEIGHBORS, myself, nextNext,
+                    new NeighborUpdate(null, null, myself, topology.getPrevNode()),
+                    logicalClock.incrementAndGet());
+            socketClient.sendMessage(nextNext, updateMsg);
 
             // Regenerate token (the failed node may have had it)
             Logger.log("Regenerating token to ensure ring has exactly one token...");
             mutex.regenerateToken();
         } else {
-            // No live nodes found - we are alone now
-            Logger.log("No live nodes found. I am now alone in the ring.");
+            // nextNext is also dead, we're alone
+            Logger.log("nextNext " + nextNext + " is also unreachable. I am alone.");
             topology.setNextNode(myself);
+            topology.setNextNextNode(myself);
+            topology.setPrevNode(myself);
+            topology.setPrevPrevNode(myself);
             mutex.regenerateToken();
         }
-    }
-
-    /**
-     * Broadcast current topology table to all known nodes.
-     */
-    private void broadcastTopology() {
-        java.util.List<NodeInfo> allNodes = topology.getAllNodes();
-        for (NodeInfo node : allNodes) {
-            if (!node.equals(myself)) {
-                Message topoMsg = new Message(Message.Type.TOPOLOGY_UPDATE, myself, node, allNodes,
-                        logicalClock.incrementAndGet());
-                socketClient.sendMessage(node, topoMsg);
-            }
-        }
-        Logger.log("Topology broadcast to " + (allNodes.size() - 1) + " nodes. Total nodes: " + allNodes.size());
     }
 
     @Override
@@ -326,7 +337,6 @@ public class Node implements MessageHandler {
             return;
 
         logicalClock.update(message.logicalTime());
-        // Logger.log("Received " + message.type + " from " + message.sender);
 
         switch (message.type()) {
             case JOIN:
@@ -352,45 +362,7 @@ public class Node implements MessageHandler {
                 }
                 break;
             case UPDATE_NEIGHBORS:
-                // Handle neighbor updates (next and/or prev)
-                if (message.payload() instanceof NeighborUpdate update) {
-                    if (update.next() != null) {
-                        topology.setNextNode(update.next());
-                    }
-                    if (update.prev() != null) {
-                        topology.setPrevNode(update.prev());
-                    }
-                    Logger.log("Neighbors updated: Next=" + update.next() + ", Prev=" + update.prev());
-                    // Reset timeout - topology is changing, give system time to stabilize
-                    lastTokenSeenTime = System.currentTimeMillis();
-                }
-                break;
-            case TOPOLOGY_UPDATE:
-                // Received full topology table from another node
-                if (message.payload() instanceof java.util.List) {
-                    @SuppressWarnings("unchecked")
-                    java.util.List<NodeInfo> nodes = (java.util.List<NodeInfo>) message.payload();
-
-                    NodeInfo currentNext = topology.getNextNode();
-                    boolean nextWasRemoved = !currentNext.equals(myself) && !nodes.contains(currentNext);
-
-                    topology.updateAllNodes(nodes);
-
-                    // If our Next was removed, find a new Next from the updated node list
-                    if (nextWasRemoved) {
-                        Logger.log("My Next " + currentNext + " was removed. Finding new Next...");
-                        for (NodeInfo node : nodes) {
-                            if (!node.equals(myself)) {
-                                topology.setNextNode(node);
-                                Logger.log("New Next neighbor: " + node);
-                                break;
-                            }
-                        }
-                    }
-
-                    // Reset timeout - topology is changing, give system time to stabilize
-                    lastTokenSeenTime = System.currentTimeMillis();
-                }
+                handleNeighborUpdate(message);
                 break;
             case PING:
                 // Heartbeat check - just acknowledge we're alive (no response needed for now)
@@ -398,6 +370,39 @@ public class Node implements MessageHandler {
                 break;
             default:
                 Logger.log("Unknown message type: " + message.type());
+        }
+    }
+
+    private void handleNeighborUpdate(Message message) {
+        if (message.payload() instanceof NeighborUpdate update) {
+            NodeInfo newPrev = update.prev();
+
+            if (update.next() != null) {
+                topology.setNextNode(update.next());
+            }
+            if (update.nextNext() != null) {
+                topology.setNextNextNode(update.nextNext());
+            }
+            if (newPrev != null) {
+                topology.setPrevNode(newPrev);
+            }
+            if (update.prevPrev() != null) {
+                topology.setPrevPrevNode(update.prevPrev());
+            }
+
+            // If our prev was updated (a new node joined between our old prev and us),
+            // send our next to the new prev so it knows its nextNext
+            if (newPrev != null && !newPrev.equals(myself)) {
+                NodeInfo myNext = topology.getNextNode();
+                Message response = new Message(Message.Type.UPDATE_NEIGHBORS, myself, newPrev,
+                        new NeighborUpdate(null, myNext, null, null),
+                        logicalClock.incrementAndGet());
+                socketClient.sendMessage(newPrev, response);
+            }
+
+            Logger.log("Neighbors updated from " + message.sender());
+            // Reset timeout - topology is changing, give system time to stabilize
+            lastTokenSeenTime = System.currentTimeMillis();
         }
     }
 
@@ -410,53 +415,64 @@ public class Node implements MessageHandler {
 
     private void handleJoin(Message message) {
         // S wants to join Me.
-        // Me -> OldNext becomes Me -> S -> OldNext
+        // Ring: ... -> Me -> OldNext -> OldNext.Next -> ...
+        // After: ... -> Me -> S -> OldNext -> OldNext.Next -> ...
 
         NodeInfo newNode = message.sender();
         NodeInfo oldNext = topology.getNextNode();
 
-        // Add new node to topology table (if not already there)
-        topology.addNode(newNode);
-
-        // My new Next is S
+        // My new Next is S, my new NextNext is oldNext
         topology.setNextNode(newNode);
+        topology.setNextNextNode(oldNext);
 
-        // Determine S's new Next
-        // If oldNext was the newNode itself (re-joining), S's next should be ME (close
-        // the ring)
-        // If oldNext was myself (I was alone), S's next should also be ME
+        // Determine S's neighbors
         NodeInfo newNodeNext;
-        if (oldNext.equals(newNode) || oldNext.equals(myself)) {
+        NodeInfo newNodeNextNext;
+        if (oldNext.equals(myself)) {
+            // I was alone, S's next is me
             newNodeNext = myself;
+            newNodeNextNext = newNode; // Ring: Me -> S -> Me
+
+            // Also update my prev pointers since S is now my prev too
+            topology.setPrevNode(newNode);
+            topology.setPrevPrevNode(newNode);
         } else {
             newNodeNext = oldNext;
+            // We don't know oldNext's next yet, oldNext will tell us via UPDATE_NEIGHBORS
+            // response
+            newNodeNextNext = myself; // Placeholder, will be updated by oldNext's response
+
             // Tell oldNext that their new prev is S (the joining node)
-            Message updatePrevMsg = new Message(Message.Type.UPDATE_NEIGHBORS, myself, oldNext,
-                    new NeighborUpdate(null, newNode), logicalClock.incrementAndGet());
-            socketClient.sendMessage(oldNext, updatePrevMsg);
+            // And their new prevPrev is me
+            // oldNext will respond with its next (which becomes S's nextNext)
+            Message updateOldNext = new Message(Message.Type.UPDATE_NEIGHBORS, myself, oldNext,
+                    new NeighborUpdate(null, null, newNode, myself), logicalClock.incrementAndGet());
+            socketClient.sendMessage(oldNext, updateOldNext);
         }
 
-        // Send UPDATE_NEIGHBORS to S with its new Next and Prev
+        // Send UPDATE_NEIGHBORS to S with its neighbor info
+        // Note: nextNextNode will be updated by oldNext's response forwarded to S
         Message resp = new Message(Message.Type.UPDATE_NEIGHBORS, myself, newNode,
-                new NeighborUpdate(newNodeNext, myself), logicalClock.incrementAndGet());
+                new NeighborUpdate(newNodeNext, newNodeNextNext, myself, topology.getPrevNode()),
+                logicalClock.incrementAndGet());
         socketClient.sendMessage(newNode, resp);
-
-        // Broadcast updated topology to ALL known nodes (including the new one)
-        broadcastTopology();
 
         Logger.log("Node " + newNode + " joined the ring. Its next: " + newNodeNext);
     }
 
     private void handleLeave(Message message) {
-        // L leaves.
-        // Msg payload = L's next (N).
-        // Msg sender = L.
-        // If L was my next, N becomes my next.
-        if (message.payload() instanceof NodeInfo newNext) {
+        // L leaves gracefully.
+        // Payload contains L's next node (who should become our new next if L was our
+        // next)
+        if (message.payload() instanceof NeighborUpdate update) {
             if (topology.getNextNode().equals(message.sender())) {
-                topology.setNextNode(newNext);
-                // We don't know new NextNext immediately, need update.
-                Logger.log("Node leaved. New Next: " + newNext);
+                if (update.next() != null) {
+                    topology.setNextNode(update.next());
+                }
+                if (update.nextNext() != null) {
+                    topology.setNextNextNode(update.nextNext());
+                }
+                Logger.log("Node " + message.sender() + " left. New Next: " + topology.getNextNode());
             }
         }
     }
@@ -474,10 +490,24 @@ public class Node implements MessageHandler {
 
     public void leave() {
         NodeInfo next = topology.getNextNode();
+        NodeInfo prev = topology.getPrevNode();
+
         if (!next.equals(myself)) {
-            Message msg = new Message(Message.Type.LEAVE, myself, next, next, logicalClock.incrementAndGet());
-            socketClient.sendMessage(next, msg);
+            // Tell prev that its new next is our next, and new nextNext is our nextNext
+            if (!prev.equals(myself)) {
+                Message updatePrev = new Message(Message.Type.UPDATE_NEIGHBORS, myself, prev,
+                        new NeighborUpdate(next, topology.getNextNextNode(), null, null),
+                        logicalClock.incrementAndGet());
+                socketClient.sendMessage(prev, updatePrev);
+            }
+
+            // Tell next that its new prev is our prev, and new prevPrev is our prevPrev
+            Message updateNext = new Message(Message.Type.UPDATE_NEIGHBORS, myself, next,
+                    new NeighborUpdate(null, null, prev, topology.getPrevPrevNode()),
+                    logicalClock.incrementAndGet());
+            socketClient.sendMessage(next, updateNext);
         }
+
         running = false;
         socketServer.stop();
         apiServer.stop();
@@ -494,12 +524,13 @@ public class Node implements MessageHandler {
         StringBuilder sb = new StringBuilder();
         sb.append("Node: ").append(myself).append("\n");
         sb.append("Next: ").append(topology.getNextNode()).append("\n");
+        sb.append("NextNext: ").append(topology.getNextNextNode()).append("\n");
         sb.append("Prev: ").append(topology.getPrevNode()).append("\n");
+        sb.append("PrevPrev: ").append(topology.getPrevPrevNode()).append("\n");
         sb.append("Token: ").append(mutex.hasToken()).append("\n");
         sb.append("LC: ").append(logicalClock.getTime()).append("\n");
         sb.append("Killed: ").append(isKilled).append("\n");
         sb.append("InCS: ").append(inCriticalSection).append("\n");
-        sb.append("Nodes: ").append(topology.getAllNodes().size()).append("\n");
         sb.append("Chat History:\n");
         for (ChatMessage msg : chatManager.getHistory()) {
             sb.append("  ").append(msg).append("\n");

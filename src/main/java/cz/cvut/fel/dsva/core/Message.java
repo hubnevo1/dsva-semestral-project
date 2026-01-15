@@ -11,8 +11,7 @@ public record Message(Type type, NodeInfo sender, NodeInfo target, Object payloa
         TOKEN, // Passing the mutex token
         CHAT, // Chat message
         PING, // Heartbeat / check alive
-        UPDATE_NEIGHBORS, // Update next/prev pointers
-        TOPOLOGY_UPDATE // Full topology table sync
+        UPDATE_NEIGHBORS // Update next/prev/nextNext/prevPrev pointers
     }
 
     // Target is optional, can be null for broadcast/ring-pass
