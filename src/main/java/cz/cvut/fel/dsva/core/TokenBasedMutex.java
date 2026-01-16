@@ -15,10 +15,22 @@ public class TokenBasedMutex {
     public void receiveToken(Token token) {
         lock.lock();
         try {
-            // Check if this token is newer than what we've seen
             if (token.getGenerationId() < lastSeenGenerationId) {
-                Logger.log("Discarding old token (gen=" + token.getGenerationId() + "), current gen=" + lastSeenGenerationId);
+                Logger.log("Discarding old token (gen=" + token.getGenerationId() + "), current gen="
+                        + lastSeenGenerationId);
                 return;
+            }
+
+            if (token.getGenerationId() == lastSeenGenerationId && currentToken != null) {
+                int cmp = token.getHash().compareTo(currentToken.getHash());
+                if (cmp > 0) {
+                    Logger.log("Discarding duplicate token (gen=" + token.getGenerationId() +
+                            ", hash=" + token.getHash().substring(0, 8) + "...), keeping current hash=" +
+                            currentToken.getHash().substring(0, 8) + "...");
+                    return;
+                } else if (cmp < 0) {
+                    Logger.log("Replacing token with smaller hash (gen=" + token.getGenerationId() + ")");
+                }
             }
 
             lastSeenGenerationId = token.getGenerationId();
